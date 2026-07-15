@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2021", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@chatr/core": ["packages/core/src"],
+      "@chatr/ai-orchestration": ["packages/ai-orchestration/src"],
+      "@chatr/api-client": ["packages/api-client/src"],
+      "@chatr/ui": ["packages/ui/src"]
+    }
+  }
+}

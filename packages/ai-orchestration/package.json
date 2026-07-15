@@ -1,0 +1,13 @@
+{
+  "name": "@chatr/ai-orchestration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "lint": "echo \"(ai) add eslint\"",
+    "typecheck": "tsc --noEmit",
+    "build": "echo \"(ai) source-only\""
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "chatr",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "description": "Chatr Trip Planner \u2014 shared monorepo for web + native mobile + API",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:up": "docker compose up -d --wait db",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @chatr/api migrate",
+    "dev:full": "pnpm db:up && pnpm db:migrate && pnpm dev",
+    "stack:up": "docker compose up --build",
+    "stack:down": "docker compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0",
+    "@electric-sql/pglite": "^0.2.0"
+  }
+}

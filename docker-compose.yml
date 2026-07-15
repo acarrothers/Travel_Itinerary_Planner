@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: chatr-db
+    environment:
+      POSTGRES_USER: chatr
+      POSTGRES_PASSWORD: chatr
+      POSTGRES_DB: chatr
+    ports:
+      - "5432:5432"
+    volumes:
+      - chatr_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatr -d chatr"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: chatr-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://chatr:chatr@db:5432/chatr
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+
+volumes:
+  chatr_pgdata:
