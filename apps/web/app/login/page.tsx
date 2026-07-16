@@ -61,6 +61,12 @@ export default function LoginPage() {
     } catch { /* user cancelled */ }
   }
 
+  const [notice, setNotice] = useState<string | null>(null);
+  async function forgot() {
+    if (!email) { setError("Enter your email above, then click again."); return; }
+    try { await api.forgotPassword(email); setNotice("If that email has an account, a reset link is on its way."); }
+    catch { setNotice("If that email has an account, a reset link is on its way."); }
+  }
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError(null);
     try {
@@ -104,6 +110,12 @@ export default function LoginPage() {
           <input style={input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
         </label>
         {error && <p style={{ color: "#C0392B", margin: 0 }}>{error}</p>}
+        {notice && <p style={{ color: tokens.color.mid, margin: 0, fontSize: 13 }}>{notice}</p>}
+        {mode === "login" && (
+          <button type="button" onClick={forgot} style={{ background: "none", border: "none", color: tokens.color.blue, cursor: "pointer", fontSize: 13, alignSelf: "flex-start", padding: 0 }}>
+            Forgot password?
+          </button>
+        )}
         <button type="submit" disabled={busy}
           style={{ background: tokens.color.blue, color: "#fff", border: "none", padding: "12px", borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: "pointer", opacity: busy ? 0.6 : 1 }}>
           {busy ? "…" : mode === "signup" ? "Create account" : "Log in"}

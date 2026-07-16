@@ -5,6 +5,7 @@ import { getTripRepository } from "../repositories/tripRepository.js";
 import { getUserRepository } from "../repositories/userRepository.js";
 import { requireUser, userOf } from "../userAuth.js";
 
+declare const process: { env: Record<string, string | undefined> };
 const repo = getTripRepository();
 const users = getUserRepository();
 const dayAgo = () => new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -13,6 +14,10 @@ export async function itineraryRoutes(app: FastifyInstance) {
   // Create — auth required; enforces the per-account-type daily limit.
   app.post("/itineraries", { preHandler: requireUser() }, async (req, reply) => {
     const user = userOf(req);
+    if (process.env.REQUIRE_EMAIL_VERIFICATION === "true") {
+      const stored = await users.getById(user.id);
+      if (stored && !stored.emailVerified) return reply.code(403).send({ error: "please verify your email to plan trips" });
+    }
     const limit = dailyLimitFor(user.accountType, await users.getAccountLimits());
     const used = await repo.countTripsSince(user.id, dayAgo());
     const rate = evaluateRateLimit(used, limit);

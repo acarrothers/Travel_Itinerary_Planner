@@ -7,6 +7,7 @@ export interface User {
   email: string;
   accountType: AccountType;
   createdAt: string;
+  emailVerified?: boolean;
 }
 
 export interface RateLimitStatus {
@@ -32,4 +33,10 @@ export function evaluateRateLimit(used: number, limit: number): RateLimitStatus 
     remaining: unlimited ? -1 : Math.max(0, limit - used),
     allowed: unlimited || used < limit,
   };
+}
+
+// True if an ISO timestamp is in the past (used for email-verify / reset tokens).
+export function isExpired(expiresAtIso: string, now: number = Date.now()): boolean {
+  const t = Date.parse(expiresAtIso);
+  return Number.isNaN(t) || t <= now;
 }

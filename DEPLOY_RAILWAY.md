@@ -86,3 +86,22 @@ How it works: the browser gets a signed ID token from Google/Apple; the API veri
 it against the provider's public keys (audience = your client ID), finds-or-creates the
 user (account type `general`, no password), and issues the app's JWT — so rate limits
 and everything else behave identically to email/password accounts.
+
+## Email verification + password reset
+- On sign-up the API emails a verification link (`/verify?token=…`); "Forgot password?"
+  on the login page emails a reset link (`/reset?token=…`). Tokens are single-use and expire.
+- Configure on the **API** service:
+  - `APP_WEB_URL` = your web URL (used to build the links)
+  - `RESEND_API_KEY` + `EMAIL_FROM` = send real emails via Resend. **If unset, the API
+    just logs the email (and link) to its console** — handy for dev, but set these in prod.
+  - `REQUIRE_EMAIL_VERIFICATION` = `true` to block trip creation until the email is verified
+    (default `false`).
+- Password reset applies to email/password accounts only (SSO accounts have no password).
+
+## Mobile (React Native / Expo) auth
+The mobile app gates the planner behind login too (email/password + Google + Apple).
+Google uses `expo-auth-session` (set `EXPO_PUBLIC_GOOGLE_CLIENT_ID`, plus
+`EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` / `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID` for native
+builds); Apple uses `expo-apple-authentication` (iOS only). Both require an **Expo dev
+build** (native modules aren't in Expo Go), and the token is stored in `expo-secure-store`.
+Set `EXPO_PUBLIC_API_BASE_URL` to your API URL.

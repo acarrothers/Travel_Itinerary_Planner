@@ -8,10 +8,15 @@
       "android"
     ],
     "ios": {
-      "bundleIdentifier": "com.tripitinerary.planner"
+      "bundleIdentifier": "com.tripitinerary.planner",
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.tripitinerary.planner"
-    }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-apple-authentication"
+    ]
   }
 }

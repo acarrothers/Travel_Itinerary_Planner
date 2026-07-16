@@ -36,7 +36,7 @@ describe("accounts + rate limiting", () => {
 
   it("stores + fetches a user by email (hash stays internal)", async () => {
     const users = new InMemoryUserRepository();
-    const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash", provider: "password" });
+    const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash", provider: "password", emailVerified: false });
     expect(u).not.toHaveProperty("passwordHash");
     const stored = await users.getByEmail("a@b.com"); // case-insensitive
     expect(stored?.passwordHash).toBe("hash");

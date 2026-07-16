@@ -7,6 +7,7 @@ import { PostgresTripRepository } from "../repositories/tripRepository";
 import { PostgresOfferRepository, seedIfEmpty } from "../repositories/offerRepository";
 import { PostgresOfferEventRepository } from "../repositories/offerEventRepository";
 import { PostgresUserRepository, seedAccountLimits } from "../repositories/userRepository";
+import { PostgresAuthTokenRepository } from "../repositories/authTokenRepository";
 import { summarizeOfferEvents, type Trip, type Offer, type OfferEvent } from "@trip-itinerary/core";
 
 let db: Db;
@@ -59,7 +60,7 @@ describe("Postgres repositories (real engine)", () => {
     await seedAccountLimits(users);
     expect((await users.getAccountLimits()).general).toBe(1);
 
-    await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h", provider: "password" });
+    await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h", provider: "password", emailVerified: false });
     const back = await users.getByEmail("pg@test.com");
     expect(back?.passwordHash).toBe("h");
 
@@ -69,5 +70,18 @@ describe("Postgres repositories (real engine)", () => {
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
     expect(await tripRepo.countTripsSince("u-pg", since)).toBe(1);
     expect(await tripRepo.countTripsSince("someone-else", since)).toBe(0);
+  });
+
+  it("auth tokens + email verification round-trip", async () => {
+    const users = new PostgresUserRepository(db);
+    await users.createUser({ id: "u-verify", email: "v@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h", provider: "password", emailVerified: false });
+    const toks = new PostgresAuthTokenRepository(db);
+    await toks.create({ token: "vt1", userId: "u-verify", type: "verify", expiresAt: new Date(Date.now() + 3600e3).toISOString() });
+    expect(await toks.consume("vt1", "reset")).toBeUndefined();
+    expect(await toks.consume("vt1", "verify")).toBe("u-verify");
+    await users.setEmailVerified("u-verify", true);
+    expect((await users.getById("u-verify"))!.emailVerified).toBe(true);
+    await users.setPasswordHash("u-verify", "newhash");
+    expect((await users.getByEmail("v@test.com"))!.passwordHash).toBe("newhash");
   });
 });

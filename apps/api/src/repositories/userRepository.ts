@@ -6,6 +6,7 @@ declare const process: { env: Record<string, string | undefined> };
 export interface StoredUser extends User {
   passwordHash: string | null; // null for SSO accounts
   provider: string;            // 'password' | 'google' | 'apple'
+  emailVerified: boolean;
 }
 
 export const DEFAULT_ACCOUNT_LIMITS: Record<string, number> = { general: 1, pro: 25, unlimited: -1 };
@@ -16,6 +17,8 @@ export interface UserRepository {
   getByEmail(email: string): Promise<StoredUser | undefined>;
   getById(id: string): Promise<StoredUser | undefined>;
   findOrCreateByEmail(email: string, provider: string): Promise<StoredUser>;
+  setEmailVerified(userId: string, verified: boolean): Promise<void>;
+  setPasswordHash(userId: string, passwordHash: string): Promise<void>;
   getAccountLimits(): Promise<Record<string, number>>;
   setAccountLimit(accountType: string, dailyTripLimit: number): Promise<void>;
 }
@@ -25,7 +28,8 @@ const toPublic = (u: StoredUser): User => ({ id: u.id, email: u.email, accountTy
 async function findOrCreate(repo: UserRepository, email: string, provider: string): Promise<StoredUser> {
   const existing = await repo.getByEmail(email);
   if (existing) return existing;
-  const stored: StoredUser = { id: uid(), email, accountType: "general", createdAt: new Date().toISOString(), passwordHash: null, provider };
+  // SSO accounts arrive with a provider-verified email.
+  const stored: StoredUser = { id: uid(), email, accountType: "general", createdAt: new Date().toISOString(), passwordHash: null, provider, emailVerified: true };
   await repo.createUser(stored);
   return stored;
 }
@@ -37,6 +41,8 @@ class InMemoryUserRepository implements UserRepository {
   async getByEmail(email: string) { return this.users.get(email.toLowerCase()); }
   async getById(id: string) { return [...this.users.values()].find((u) => u.id === id); }
   findOrCreateByEmail(email: string, provider: string) { return findOrCreate(this, email, provider); }
+  async setEmailVerified(userId: string, v: boolean) { const u = await this.getById(userId); if (u) u.emailVerified = v; }
+  async setPasswordHash(userId: string, h: string) { const u = await this.getById(userId); if (u) u.passwordHash = h; }
   async getAccountLimits() { return { ...this.limits }; }
   async setAccountLimit(t: string, n: number) { this.limits[t] = n; }
 }
@@ -45,18 +51,20 @@ class PostgresUserRepository implements UserRepository {
   constructor(private db: Db) {}
   async createUser(u: StoredUser) {
     await this.db.query(
-      `INSERT INTO users (id, email, password_hash, provider, account_type, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6)`,
-      [u.id, u.email.toLowerCase(), u.passwordHash, u.provider, u.accountType, u.createdAt],
+      `INSERT INTO users (id, email, password_hash, provider, account_type, email_verified, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [u.id, u.email.toLowerCase(), u.passwordHash, u.provider, u.accountType, u.emailVerified, u.createdAt],
     );
     return toPublic(u);
   }
   private map(r: any): StoredUser | undefined {
-    return r ? { id: r.id, email: r.email, passwordHash: r.password_hash ?? null, provider: r.provider, accountType: r.account_type, createdAt: r.created_at } : undefined;
+    return r ? { id: r.id, email: r.email, passwordHash: r.password_hash ?? null, provider: r.provider, accountType: r.account_type, emailVerified: !!r.email_verified, createdAt: r.created_at } : undefined;
   }
   async getByEmail(email: string) { return this.map((await this.db.query(`SELECT * FROM users WHERE email = $1`, [email.toLowerCase()])).rows[0]); }
   async getById(id: string) { return this.map((await this.db.query(`SELECT * FROM users WHERE id = $1`, [id])).rows[0]); }
   findOrCreateByEmail(email: string, provider: string) { return findOrCreate(this, email, provider); }
+  async setEmailVerified(userId: string, v: boolean) { await this.db.query(`UPDATE users SET email_verified = $2 WHERE id = $1`, [userId, v]); }
+  async setPasswordHash(userId: string, h: string) { await this.db.query(`UPDATE users SET password_hash = $2 WHERE id = $1`, [userId, h]); }
   async getAccountLimits() {
     const r = await this.db.query(`SELECT account_type, daily_trip_limit FROM account_limits`);
     const out: Record<string, number> = {};

@@ -41,9 +41,19 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT,                     -- null for SSO accounts (Google/Apple)
   provider      TEXT NOT NULL DEFAULT 'password',  -- 'password' | 'google' | 'apple'
   account_type  TEXT NOT NULL DEFAULT 'general',
+  email_verified BOOLEAN NOT NULL DEFAULT false,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS account_limits (
   account_type     TEXT PRIMARY KEY,
   daily_trip_limit INT NOT NULL   -- trips per 24h; -1 = unlimited
 );
+
+-- One-time tokens for email verification + password reset.
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  token      TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL,
+  type       TEXT NOT NULL,          -- 'verify' | 'reset'
+  expires_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS auth_tokens_user_idx ON auth_tokens (user_id);
