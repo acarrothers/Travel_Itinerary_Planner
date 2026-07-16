@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"(mobile) add eslint\""
+    "lint": "echo \"(mobile) add eslint\"",
+    "build:dev": "eas build --profile development"
   },
   "dependencies": {
     "@trip-itinerary/core": "workspace:*",
@@ -22,7 +23,8 @@
     "expo-web-browser": "~13.0.3",
     "expo-crypto": "~13.0.2",
     "expo-apple-authentication": "~6.4.2",
-    "expo-secure-store": "~13.0.2"
+    "expo-secure-store": "~13.0.2",
+    "expo-dev-client": "~4.0.29"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

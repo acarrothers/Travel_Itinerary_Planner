@@ -24,6 +24,7 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
    - `VIATOR_AFFILIATE_ID` = your Viator PID (optional)
    - `APP_API_KEYS` = e.g. `{"admin-key":"admin"}` (optional; omit for open dev mode)
    - `CORS_ORIGIN` = your web URL (set in step 4 after the web domain exists)
+   - `NODE_ENV` = `production` (required so the session cookie is Secure + SameSite=None cross-origin)
    - `PGSSL` = `true` **only** if your DB needs SSL and its URL lacks `sslmode=require`
      (leave unset for Railway's internal DATABASE_URL and for Neon URLs).
 5. **Settings → Networking → Generate Domain**. Copy the API URL (e.g.

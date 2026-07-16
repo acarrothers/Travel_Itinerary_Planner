@@ -1,6 +1,8 @@
 import "./env.js";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
+import rateLimit from "@fastify/rate-limit";
 import { itineraryRoutes } from "./routes/itineraries.js";
 import { offerRoutes } from "./routes/offers.js";
 import { adminRoutes } from "./routes/admin.js";
@@ -11,7 +13,11 @@ import { availableProviders } from "./aiSetup.js";
 
 const app = Fastify({ logger: true });
 // Allow the web client origin(s); default open for local/demo. Set CORS_ORIGIN to lock down.
-await app.register(cors, { origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : true });
+await app.register(cookie);
+// Credentials enabled so the browser sends the httpOnly session cookie cross-origin.
+await app.register(cors, { origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : true, credentials: true });
+// Abuse protection: global cap; auth routes set tighter per-route limits.
+await app.register(rateLimit, { max: 200, timeWindow: "1 minute" });
 app.get("/health", async () => ({ ok: true, service: "trip-itinerary-api", providers: availableProviders() }));
 app.register(itineraryRoutes);
 app.register(offerRoutes);

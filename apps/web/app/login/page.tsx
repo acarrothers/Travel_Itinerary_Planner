@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import { api } from "../../lib/api";
-import { setToken } from "../../lib/auth";
 
 declare const process: { env: Record<string, string | undefined> };
 const GOOGLE_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -28,9 +27,9 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const googleBtn = useRef<HTMLDivElement | null>(null);
 
-  async function finish(token: string) { setToken(token); router.push("/plan"); }
+  function finish() { router.push("/plan"); }
   async function ssoLogin(provider: "google" | "apple", idToken: string) {
-    try { const r = await api.oauthLogin(provider, idToken); await finish(r.token); }
+    try { await api.oauthLogin(provider, idToken); finish(); }
     catch (e: any) { setError(e?.message ?? `${provider} sign-in failed`); }
   }
 
@@ -70,8 +69,8 @@ export default function LoginPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError(null);
     try {
-      const res = mode === "signup" ? await api.register(email, password) : await api.login(email, password);
-      await finish(res.token);
+      if (mode === "signup") await api.register(email, password); else await api.login(email, password);
+      finish();
     } catch (err: any) { setError(err?.message ?? "Something went wrong"); }
     finally { setBusy(false); }
   }

@@ -21,7 +21,9 @@
     "tsx": "^4.16.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "jose": "^5.9.6"
+    "jose": "^5.9.6",
+    "@fastify/cookie": "^9.4.0",
+    "@fastify/rate-limit": "^9.1.0"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

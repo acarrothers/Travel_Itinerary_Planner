@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import type { Trip, Offer, TripPreferences, ReorderInput, User, RateLimitStatus } from "@trip-itinerary/core";
 import { api } from "../../lib/api";
-import { getToken, clearToken } from "../../lib/auth";
 import { OnboardingForm } from "../components/OnboardingForm";
 import { ItineraryView } from "../components/ItineraryView";
 import { MapView } from "../components/MapView";
@@ -21,14 +20,13 @@ export default function PlanPage() {
   const [instruction, setInstruction] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Auth guard: no token -> login. Load the current user + rate status.
+  // Auth guard: the session lives in an httpOnly cookie; /auth/me confirms it.
   useEffect(() => {
-    if (!getToken()) { router.replace("/login"); return; }
     api.me().then((m) => { setUser(m.user); setRate(m.rate); })
-      .catch(() => { clearToken(); router.replace("/login"); });
+      .catch(() => router.replace("/login"));
   }, [router]);
 
-  function logout() { clearToken(); router.replace("/login"); }
+  async function logout() { try { await api.logout(); } catch { /* ignore */ } router.replace("/login"); }
   async function refreshOffer(id: string) { setOffer(await api.matchOffer(id, "post_generation")); }
 
   async function generate(prefs: TripPreferences) {

@@ -3,6 +3,7 @@ import type { Trip, TripPreferences, Offer, OfferReportRow, Partner, ReorderInpu
 export interface ClientOptions {
   authToken?: string;
   getAuthToken?: () => string | null | undefined;
+  credentials?: RequestInit["credentials"]; // web uses "include" for httpOnly cookie sessions
 }
 
 export interface AuthResult { token: string; user: User; }
@@ -16,7 +17,7 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers as Record<string, string> | undefined),
     };
-    const res = await fetch(`${baseUrl}${path}`, { ...init, headers });
+    const res = await fetch(`${baseUrl}${path}`, { ...init, headers, credentials: opts.credentials });
     if (!res.ok) {
       let body: any = {};
       try { body = await res.json(); } catch { /* ignore */ }
@@ -32,6 +33,7 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     login: (email: string, password: string) => req<AuthResult>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
     oauthLogin: (provider: "google" | "apple", idToken: string) => req<AuthResult>("/auth/oauth", { method: "POST", body: JSON.stringify({ provider, idToken }) }),
     me: () => req<{ user: User; rate: RateLimitStatus }>("/auth/me"),
+    logout: () => req<{ ok: boolean }>("/auth/logout", { method: "POST" }),
     verifyEmail: (token: string) => req<{ ok: boolean }>("/auth/verify", { method: "POST", body: JSON.stringify({ token }) }),
     resendVerification: () => req<{ ok: boolean }>("/auth/resend-verification", { method: "POST" }),
     forgotPassword: (email: string) => req<{ ok: boolean }>("/auth/forgot", { method: "POST", body: JSON.stringify({ email }) }),
