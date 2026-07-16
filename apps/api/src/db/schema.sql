@@ -38,7 +38,8 @@ CREATE INDEX IF NOT EXISTS offers_status_idx ON offers (status);
 CREATE TABLE IF NOT EXISTS users (
   id            TEXT PRIMARY KEY,
   email         TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,                     -- null for SSO accounts (Google/Apple)
+  provider      TEXT NOT NULL DEFAULT 'password',  -- 'password' | 'google' | 'apple'
   account_type  TEXT NOT NULL DEFAULT 'general',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );

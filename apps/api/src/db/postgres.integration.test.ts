@@ -59,7 +59,7 @@ describe("Postgres repositories (real engine)", () => {
     await seedAccountLimits(users);
     expect((await users.getAccountLimits()).general).toBe(1);
 
-    await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h" });
+    await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h", provider: "password" });
     const back = await users.getByEmail("pg@test.com");
     expect(back?.passwordHash).toBe("h");
 

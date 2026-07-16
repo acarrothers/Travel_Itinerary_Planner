@@ -1,9 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import { api } from "../../lib/api";
 import { setToken } from "../../lib/auth";
+
+declare const process: { env: Record<string, string | undefined> };
+const GOOGLE_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const APPLE_ID = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID;
+const APPLE_REDIRECT = process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI;
+
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const el = document.createElement("script");
+    el.src = src; el.async = true; el.onload = () => resolve(); el.onerror = () => reject();
+    document.head.appendChild(el);
+  });
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,20 +26,52 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const googleBtn = useRef<HTMLDivElement | null>(null);
+
+  async function finish(token: string) { setToken(token); router.push("/plan"); }
+  async function ssoLogin(provider: "google" | "apple", idToken: string) {
+    try { const r = await api.oauthLogin(provider, idToken); await finish(r.token); }
+    catch (e: any) { setError(e?.message ?? `${provider} sign-in failed`); }
+  }
+
+  // Google Identity Services button
+  useEffect(() => {
+    if (!GOOGLE_ID || !googleBtn.current) return;
+    loadScript("https://accounts.google.com/gsi/client").then(() => {
+      const g = (window as any).google;
+      if (!g?.accounts?.id) return;
+      g.accounts.id.initialize({ client_id: GOOGLE_ID, callback: (resp: any) => ssoLogin("google", resp.credential) });
+      g.accounts.id.renderButton(googleBtn.current, { theme: "outline", size: "large", width: 320, text: "continue_with" });
+    }).catch(() => {});
+  }, []);
+
+  // Apple JS SDK
+  useEffect(() => {
+    if (!APPLE_ID) return;
+    loadScript("https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js").then(() => {
+      (window as any).AppleID?.auth?.init({ clientId: APPLE_ID, scope: "email", redirectURI: APPLE_REDIRECT, usePopup: true });
+    }).catch(() => {});
+  }, []);
+
+  async function appleSignIn() {
+    try {
+      const data = await (window as any).AppleID.auth.signIn();
+      const idToken = data?.authorization?.id_token;
+      if (idToken) ssoLogin("apple", idToken);
+    } catch { /* user cancelled */ }
+  }
 
   async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true); setError(null);
+    e.preventDefault(); setBusy(true); setError(null);
     try {
       const res = mode === "signup" ? await api.register(email, password) : await api.login(email, password);
-      setToken(res.token);
-      router.push("/plan");
-    } catch (err: any) {
-      setError(err?.message ?? "Something went wrong");
-    } finally { setBusy(false); }
+      await finish(res.token);
+    } catch (err: any) { setError(err?.message ?? "Something went wrong"); }
+    finally { setBusy(false); }
   }
 
   const input: React.CSSProperties = { width: "100%", padding: "10px 12px", border: "1px solid #D5DEEC", borderRadius: 8, fontSize: 15, marginTop: 4 };
+  const showSSO = !!(GOOGLE_ID || APPLE_ID);
 
   return (
     <main style={{ maxWidth: 380, margin: "8vh auto", padding: tokens.space.xl, fontFamily: tokens.font.family }}>
@@ -35,7 +81,22 @@ export default function LoginPage() {
       <p style={{ color: tokens.color.mid, marginTop: 0 }}>
         {mode === "signup" ? "Create an account to start planning." : "Log in to plan your trips."}
       </p>
-      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: tokens.space.lg }}>
+
+      {showSSO && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: tokens.space.md, alignItems: "center" }}>
+          {GOOGLE_ID && <div ref={googleBtn} />}
+          {APPLE_ID && (
+            <button onClick={appleSignIn} style={{ width: 320, height: 40, background: "#000", color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+               Continue with Apple
+            </button>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", color: tokens.color.mid, fontSize: 12, margin: "6px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "#E2E8F2" }} /> or <div style={{ flex: 1, height: 1, background: "#E2E8F2" }} />
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <label style={{ fontSize: 13, color: tokens.color.mid }}>Email
           <input style={input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>

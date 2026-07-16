@@ -36,9 +36,23 @@ describe("accounts + rate limiting", () => {
 
   it("stores + fetches a user by email (hash stays internal)", async () => {
     const users = new InMemoryUserRepository();
-    const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash" });
+    const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash", provider: "password" });
     expect(u).not.toHaveProperty("passwordHash");
     const stored = await users.getByEmail("a@b.com"); // case-insensitive
     expect(stored?.passwordHash).toBe("hash");
+  });
+});
+
+
+describe("findOrCreateByEmail (SSO)", () => {
+  it("creates a general account with null password on first SSO sign-in, reuses it after", async () => {
+    const { InMemoryUserRepository } = await import("./userRepository");
+    const users = new InMemoryUserRepository();
+    const a = await users.findOrCreateByEmail("sso@user.com", "google");
+    expect(a.provider).toBe("google");
+    expect(a.passwordHash).toBeNull();
+    expect(a.accountType).toBe("general");
+    const b = await users.findOrCreateByEmail("SSO@user.com", "google"); // case-insensitive
+    expect(b.id).toBe(a.id);
   });
 });

@@ -62,3 +62,27 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
 - To upgrade a user: `UPDATE users SET account_type = 'pro' WHERE email = '...';`.
 - `JWT_SECRET` **must** be set in production; without it the API falls back to an
   insecure dev secret and logs a warning.
+
+## SSO (Sign in with Google / Apple) — optional
+The email/password login works with no setup. The Google/Apple buttons only appear
+when their client IDs are configured. Setup:
+
+**Google**
+1. Google Cloud Console → APIs & Services → Credentials → **OAuth client ID** (type: Web).
+2. Authorized JavaScript origins: your web URL (and `http://localhost:3000` for dev).
+3. Copy the Client ID. Set it in **two** places:
+   - API service: `GOOGLE_CLIENT_ID`
+   - Web service: `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (build-time)
+
+**Apple** (requires an Apple Developer Program membership)
+1. Apple Developer → Certificates, IDs & Profiles → **Services ID**; enable "Sign in with Apple".
+2. Configure your domain + Return URL (your web URL).
+3. Set:
+   - API service: `APPLE_CLIENT_ID` = the Services ID
+   - Web service: `NEXT_PUBLIC_APPLE_CLIENT_ID` = the Services ID, and
+     `NEXT_PUBLIC_APPLE_REDIRECT_URI` = your web URL (must match Apple's config)
+
+How it works: the browser gets a signed ID token from Google/Apple; the API verifies
+it against the provider's public keys (audience = your client ID), finds-or-creates the
+user (account type `general`, no password), and issues the app's JWT — so rate limits
+and everything else behave identically to email/password accounts.

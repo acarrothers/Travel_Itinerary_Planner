@@ -3,6 +3,7 @@ import { dailyLimitFor, evaluateRateLimit } from "@trip-itinerary/core";
 import { getUserRepository, type StoredUser } from "../repositories/userRepository.js";
 import { getTripRepository } from "../repositories/tripRepository.js";
 import { hashPassword, verifyPassword, signToken, requireUser, userOf, isValidEmail } from "../userAuth.js";
+import { verifyProviderToken, type SsoProvider } from "../oauth.js";
 
 const users = getUserRepository();
 const trips = getTripRepository();
@@ -21,7 +22,7 @@ export async function authRoutes(app: FastifyInstance) {
     if (!email || !isValidEmail(email)) return reply.code(400).send({ error: "valid email required" });
     if (!password || password.length < 8) return reply.code(400).send({ error: "password must be at least 8 characters" });
     if (await users.getByEmail(email)) return reply.code(409).send({ error: "email already registered" });
-    const stored: StoredUser = { id: uid(), email, accountType: "general", createdAt: new Date().toISOString(), passwordHash: await hashPassword(password) };
+    const stored: StoredUser = { id: uid(), email, accountType: "general", createdAt: new Date().toISOString(), passwordHash: await hashPassword(password), provider: "password" };
     const user = await users.createUser(stored);
     return { token: signToken({ id: user.id, email: user.email, accountType: user.accountType }), user };
   });
@@ -29,9 +30,21 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/auth/login", async (req, reply) => {
     const { email, password } = (req.body ?? {}) as { email?: string; password?: string };
     const stored = email ? await users.getByEmail(email) : undefined;
-    if (!stored || !(await verifyPassword(password ?? "", stored.passwordHash))) {
+    if (!stored || !stored.passwordHash || !(await verifyPassword(password ?? "", stored.passwordHash))) {
       return reply.code(401).send({ error: "invalid email or password" });
     }
+    const user = { id: stored.id, email: stored.email, accountType: stored.accountType };
+    return { token: signToken(user), user: { ...user, createdAt: stored.createdAt } };
+  });
+
+  // SSO: verify a Google/Apple ID token, find-or-create the user, issue our app JWT.
+  app.post("/auth/oauth", async (req, reply) => {
+    const { provider, idToken } = (req.body ?? {}) as { provider?: SsoProvider; idToken?: string };
+    if (!provider || !idToken) return reply.code(400).send({ error: "provider and idToken required" });
+    let info;
+    try { info = await verifyProviderToken(provider, idToken); }
+    catch (e) { return reply.code(401).send({ error: `invalid ${provider} sign-in`, detail: (e as Error).message }); }
+    const stored = await users.findOrCreateByEmail(info.email, provider);
     const user = { id: stored.id, email: stored.email, accountType: stored.accountType };
     return { token: signToken(user), user: { ...user, createdAt: stored.createdAt } };
   });

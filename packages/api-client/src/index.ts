@@ -30,6 +30,7 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     // auth
     register: (email: string, password: string) => req<AuthResult>("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) }),
     login: (email: string, password: string) => req<AuthResult>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+    oauthLogin: (provider: "google" | "apple", idToken: string) => req<AuthResult>("/auth/oauth", { method: "POST", body: JSON.stringify({ provider, idToken }) }),
     me: () => req<{ user: User; rate: RateLimitStatus }>("/auth/me"),
     // itinerary (auth required server-side)
     createItinerary: (prefs: TripPreferences) => req<Trip & { _rate?: RateLimitStatus }>("/itineraries", { method: "POST", body: JSON.stringify(prefs) }),
