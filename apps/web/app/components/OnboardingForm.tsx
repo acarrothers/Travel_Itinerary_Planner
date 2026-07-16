@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { tokens } from "@chatr/ui";
-import type { TripPreferences, BudgetBand, PartyType, Pace } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { TripPreferences, BudgetBand, PartyType, Pace } from "@trip-itinerary/core";
 
 const INTERESTS = ["food", "culture", "adventure", "nature", "history", "nightlife", "relaxation"];
 

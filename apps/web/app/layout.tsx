@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { tokens } from "@chatr/ui";
+import { tokens } from "@trip-itinerary/ui";
 
-export const metadata = { title: "Chatr Trip Planner", description: "AI travel itineraries" };
+export const metadata = { title: "Trip Itinerary Planner", description: "AI travel itineraries" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

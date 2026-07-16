@@ -1,5 +1,5 @@
 {
-  "name": "@chatr/api",
+  "name": "@trip-itinerary/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,8 +12,8 @@
     "start": "tsx src/index.ts"
   },
   "dependencies": {
-    "@chatr/core": "workspace:*",
-    "@chatr/ai-orchestration": "workspace:*",
+    "@trip-itinerary/core": "workspace:*",
+    "@trip-itinerary/ai-orchestration": "workspace:*",
     "fastify": "^4.28.0",
     "pg": "^8.12.0",
     "dotenv": "^16.4.5",

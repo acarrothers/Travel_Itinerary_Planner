@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
-import { tokens } from "@chatr/ui";
-import type { Trip, ReorderInput } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { Trip, ReorderInput } from "@trip-itinerary/core";
 
 export function ItineraryView({ trip, onReorder }: { trip: Trip; onReorder?: (mv: ReorderInput) => void }) {
   const drag = useRef<{ day: number; index: number } | null>(null);

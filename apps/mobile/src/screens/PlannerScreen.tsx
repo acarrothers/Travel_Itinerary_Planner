@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SafeAreaView, ScrollView, View, Text, TextInput, Pressable, StyleSheet } from "react-native";
-import { tokens } from "@chatr/ui";
-import type { Trip, Offer, TripPreferences, ReorderInput } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { Trip, Offer, TripPreferences, ReorderInput } from "@trip-itinerary/core";
 import { api } from "../lib/api";
 import { OnboardingForm } from "../components/OnboardingForm";
 import { ItineraryView } from "../components/ItineraryView";
@@ -21,7 +21,7 @@ export function PlannerScreen() {
   async function generate(prefs: TripPreferences) {
     setLoading(true); setError(null); setOffer(null);
     try { const t = await api.createItinerary(prefs); setTrip(t); await refreshOffer(t.id); }
-    catch { setError("Could not reach the API. Start it with `pnpm --filter @chatr/api dev`."); }
+    catch { setError("Could not reach the API. Start it with `pnpm --filter @trip-itinerary/api dev`."); }
     finally { setLoading(false); }
   }
 
@@ -41,7 +41,7 @@ export function PlannerScreen() {
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={styles.h1}>Chatr <Text style={{ color: tokens.color.blue }}>Trip Planner</Text></Text>
+        <Text style={styles.h1}>Trip Itinerary <Text style={{ color: tokens.color.blue }}>Planner</Text></Text>
         <OnboardingForm onGenerate={generate} loading={loading} />
         {error ? <Text style={styles.err}>{error}</Text> : null}
 

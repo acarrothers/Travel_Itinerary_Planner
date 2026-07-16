@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { tripMapPoints, type Trip } from "@chatr/core";
-import { tokens } from "@chatr/ui";
+import { tripMapPoints, type Trip } from "@trip-itinerary/core";
+import { tokens } from "@trip-itinerary/ui";
 
 declare const process: { env: Record<string, string | undefined> };
 const KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 declare global {
-  interface Window { google?: any; __chatrGMaps?: Promise<void> }
+  interface Window { google?: any; __tripGMaps?: Promise<void> }
 }
 
 // Load the Google Maps JS SDK once (script tag). Cached on window so repeated
@@ -15,8 +15,8 @@ declare global {
 function loadGoogleMaps(key: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.google?.maps) return Promise.resolve();
-  if (!window.__chatrGMaps) {
-    window.__chatrGMaps = new Promise((resolve, reject) => {
+  if (!window.__tripGMaps) {
+    window.__tripGMaps = new Promise((resolve, reject) => {
       const s = document.createElement("script");
       s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}`;
       s.async = true;
@@ -25,7 +25,7 @@ function loadGoogleMaps(key: string): Promise<void> {
       document.head.appendChild(s);
     });
   }
-  return window.__chatrGMaps;
+  return window.__tripGMaps;
 }
 
 // Plots itinerary items (those with coordinates) on a Google map. Shows a notice

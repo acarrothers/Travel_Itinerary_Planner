@@ -1,17 +1,17 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: chatr-db
+    container_name: trip-itinerary-db
     environment:
-      POSTGRES_USER: chatr
-      POSTGRES_PASSWORD: chatr
-      POSTGRES_DB: chatr
+      POSTGRES_USER: tripplanner
+      POSTGRES_PASSWORD: tripplanner
+      POSTGRES_DB: tripplanner
     ports:
       - "5432:5432"
     volumes:
-      - chatr_pgdata:/var/lib/postgresql/data
+      - tripplanner_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chatr -d chatr"]
+      test: ["CMD-SHELL", "pg_isready -U tripplanner -d tripplanner"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -20,15 +20,15 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: chatr-api
+    container_name: trip-itinerary-api
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://chatr:chatr@db:5432/chatr
+      DATABASE_URL: postgresql://tripplanner:tripplanner@db:5432/tripplanner
       PORT: "4000"
     ports:
       - "4000:4000"
 
 volumes:
-  chatr_pgdata:
+  tripplanner_pgdata:

@@ -1,6 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { tokens } from "@chatr/ui";
-import type { Trip, ReorderInput } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { Trip, ReorderInput } from "@trip-itinerary/core";
 
 export function ItineraryView({ trip, onReorder }: { trip: Trip; onReorder?: (mv: ReorderInput) => void }) {
   return (

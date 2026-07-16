@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { reorderItem, type TripPreferences, type ReorderInput } from "@chatr/core";
+import { reorderItem, type TripPreferences, type ReorderInput } from "@trip-itinerary/core";
 import { generateItinerary, editItinerary } from "../services/itineraryService.js";
 import { getTripRepository } from "../repositories/tripRepository.js";
 

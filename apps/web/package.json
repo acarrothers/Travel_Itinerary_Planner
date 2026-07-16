@@ -1,5 +1,5 @@
 {
-  "name": "@chatr/web",
+  "name": "@trip-itinerary/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,9 +10,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chatr/core": "workspace:*",
-    "@chatr/api-client": "workspace:*",
-    "@chatr/ui": "workspace:*",
+    "@trip-itinerary/core": "workspace:*",
+    "@trip-itinerary/api-client": "workspace:*",
+    "@trip-itinerary/ui": "workspace:*",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"

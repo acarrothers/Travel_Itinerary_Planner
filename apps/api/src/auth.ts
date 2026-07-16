@@ -16,7 +16,7 @@ export function can(role: Role, action: Action): boolean {
   return MATRIX[role]?.includes(action) ?? false;
 }
 
-// Resolve a bearer token to a role using a JSON map (env CHATR_API_KEYS).
+// Resolve a bearer token to a role using a JSON map (env APP_API_KEYS).
 // Returns null if not configured or unknown token.
 export function roleForToken(token: string | undefined, keysJson: string | undefined): Role | null {
   if (!keysJson) return null;

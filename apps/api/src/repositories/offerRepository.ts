@@ -1,4 +1,4 @@
-import type { Offer, Partner } from "@chatr/core";
+import type { Offer, Partner } from "@trip-itinerary/core";
 import { pgDb, type Db } from "../db/client.js";
 import { seedOffers, seedPartners } from "./seed.js";
 

@@ -23,15 +23,15 @@ importers:
 
   apps/api:
     dependencies:
-      '@chatr/ai-orchestration':
-        specifier: workspace:*
-        version: link:../../packages/ai-orchestration
-      '@chatr/core':
-        specifier: workspace:*
-        version: link:../../packages/core
       '@fastify/cors':
         specifier: ^9.0.1
         version: 9.0.1
+      '@trip-itinerary/ai-orchestration':
+        specifier: workspace:*
+        version: link:../../packages/ai-orchestration
+      '@trip-itinerary/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
@@ -57,13 +57,13 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@chatr/api-client':
+      '@trip-itinerary/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@chatr/core':
+      '@trip-itinerary/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@chatr/ui':
+      '@trip-itinerary/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       expo:
@@ -88,13 +88,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@chatr/api-client':
+      '@trip-itinerary/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@chatr/core':
+      '@trip-itinerary/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@chatr/ui':
+      '@trip-itinerary/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:

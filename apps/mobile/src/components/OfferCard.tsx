@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Linking, StyleSheet } from "react-native";
-import { tokens } from "@chatr/ui";
-import type { Offer } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { Offer } from "@trip-itinerary/core";
 
 export function OfferCard({ offer, clickUrl }: { offer: Offer; clickUrl: string }) {
   return (

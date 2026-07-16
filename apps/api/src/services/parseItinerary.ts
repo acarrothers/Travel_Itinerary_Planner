@@ -1,4 +1,4 @@
-import type { Trip, TripPreferences, Day, Item, ItemType } from "@chatr/core";
+import type { Trip, TripPreferences, Day, Item, ItemType } from "@trip-itinerary/core";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const TYPES: ItemType[] = ["activity", "meal", "transit", "lodging", "custom"];

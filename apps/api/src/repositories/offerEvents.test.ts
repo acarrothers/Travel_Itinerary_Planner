@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { InMemoryOfferEventRepository, getOfferEventRepository } from "./offerEventRepository";
-import { summarizeOfferEvents, type OfferEvent } from "@chatr/core";
+import { summarizeOfferEvents, type OfferEvent } from "@trip-itinerary/core";
 
 const e = (type: OfferEvent["type"], over: Partial<OfferEvent> = {}): OfferEvent =>
   ({ id: Math.random().toString(), offerId: "o1", partnerId: "viator", type, timestamp: new Date().toISOString(), ...over });

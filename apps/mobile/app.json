@@ -1,10 +1,17 @@
 {
   "expo": {
-    "name": "Chatr Trip Planner",
-    "slug": "chatr-trip-planner",
-    "scheme": "chatr",
-    "platforms": ["ios", "android"],
-    "ios": { "bundleIdentifier": "com.chatr.tripplanner" },
-    "android": { "package": "com.chatr.tripplanner" }
+    "name": "Trip Itinerary Planner",
+    "slug": "trip-itinerary-planner",
+    "scheme": "tripitinerary",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.tripitinerary.planner"
+    },
+    "android": {
+      "package": "com.tripitinerary.planner"
+    }
   }
 }

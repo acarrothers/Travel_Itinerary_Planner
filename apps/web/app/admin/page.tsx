@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@chatr/api-client";
-import { tokens } from "@chatr/ui";
-import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, describeRule } from "@chatr/core";
-import type { Offer, TargetingRule } from "@chatr/core";
+import { createClient } from "@trip-itinerary/api-client";
+import { tokens } from "@trip-itinerary/ui";
+import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, describeRule } from "@trip-itinerary/core";
+import type { Offer, TargetingRule } from "@trip-itinerary/core";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -29,7 +29,7 @@ export default function AdminPage() {
       setOffers(await client.adminListOffers());
       setMe(await client.adminMe());
     } catch (e: any) {
-      setError(e?.message?.includes("401") ? "Unauthorized — enter a valid API key." : "API not reachable. Run `pnpm --filter @chatr/api dev`.");
+      setError(e?.message?.includes("401") ? "Unauthorized — enter a valid API key." : "API not reachable. Run `pnpm --filter @trip-itinerary/api dev`.");
     }
   }
   useEffect(() => { load(); }, [token]);

@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
-import { tripMapPoints, type Trip } from "@chatr/core";
-import { tokens } from "@chatr/ui";
+import { tripMapPoints, type Trip } from "@trip-itinerary/core";
+import { tokens } from "@trip-itinerary/ui";
 
 // Uses the SAME shared `tripMapPoints` helper as the web map, so both clients plot
 // identical points. This renders a lightweight stops preview that runs in Expo Go.

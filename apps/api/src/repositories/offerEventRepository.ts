@@ -1,4 +1,4 @@
-import type { OfferEvent } from "@chatr/core";
+import type { OfferEvent } from "@trip-itinerary/core";
 import { pgDb, type Db } from "../db/client.js";
 
 declare const process: { env: Record<string, string | undefined> };

@@ -12,4 +12,4 @@ RUN pnpm install --no-frozen-lockfile
 
 EXPOSE 4000
 # Run migrations then start (idempotent; seedIfEmpty guards re-seeding).
-CMD ["sh", "-c", "pnpm --filter @chatr/api migrate && pnpm --filter @chatr/api start"]
+CMD ["sh", "-c", "pnpm --filter @trip-itinerary/api migrate && pnpm --filter @trip-itinerary/api start"]

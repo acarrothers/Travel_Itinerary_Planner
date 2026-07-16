@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
-import { tokens } from "@chatr/ui";
-import type { TripPreferences, BudgetBand, PartyType } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { TripPreferences, BudgetBand, PartyType } from "@trip-itinerary/core";
 
 const INTERESTS = ["food", "culture", "adventure", "nature", "history", "nightlife"];
 const BUDGETS: BudgetBand[] = ["budget", "mid", "luxury"];

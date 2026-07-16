@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@chatr/api-client";
-import { tokens } from "@chatr/ui";
-import type { OfferReportRow } from "@chatr/core";
+import { createClient } from "@trip-itinerary/api-client";
+import { tokens } from "@trip-itinerary/ui";
+import type { OfferReportRow } from "@trip-itinerary/core";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -19,7 +19,7 @@ export default function ReportsPage() {
   async function load() {
     setError(null);
     try { setRows(await client.adminReport()); }
-    catch { setError("API not reachable. Run `pnpm --filter @chatr/api dev`."); }
+    catch { setError("API not reachable. Run `pnpm --filter @trip-itinerary/api dev`."); }
   }
   useEffect(() => { load(); }, [token]);
 

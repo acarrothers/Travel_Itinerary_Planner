@@ -1,4 +1,4 @@
-import type { TripPreferences, Poi } from "@chatr/core";
+import type { TripPreferences, Poi } from "@trip-itinerary/core";
 
 declare const process: { env: Record<string, string | undefined> };
 

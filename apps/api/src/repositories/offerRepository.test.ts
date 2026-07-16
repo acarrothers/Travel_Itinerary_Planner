@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { InMemoryOfferRepository } from "./offerRepository";
-import type { Offer } from "@chatr/core";
+import type { Offer } from "@trip-itinerary/core";
 
 const mk = (id: string, status: Offer["status"]): Offer => ({
   id, partnerId: "viator", title: id, ctaLabel: "Go", destinationUrl: "https://x", category: "tours",
@@ -26,7 +26,7 @@ describe("InMemoryOfferRepository", () => {
   });
 });
 
-import { matchOffers, extractSignals, type Trip } from "@chatr/core";
+import { matchOffers, extractSignals, type Trip } from "@trip-itinerary/core";
 
 function cultureTrip(nights: number): Trip {
   const now = new Date().toISOString();

@@ -1,4 +1,4 @@
-import type { Trip, TripPreferences, Offer, OfferReportRow, Partner, ReorderInput } from "@chatr/core";
+import type { Trip, TripPreferences, Offer, OfferReportRow, Partner, ReorderInput } from "@trip-itinerary/core";
 
 export interface ClientOptions { authToken?: string }
 
@@ -35,4 +35,4 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     adminSavePartner: (p: Partner) => req<Partner>("/admin/partners", { method: "POST", body: JSON.stringify(p) }),
   };
 }
-export type ChatrClient = ReturnType<typeof createClient>;
+export type ApiClient = ReturnType<typeof createClient>;

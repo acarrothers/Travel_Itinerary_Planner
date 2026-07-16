@@ -1,4 +1,4 @@
--- Chatr trips. JSONB keeps the scaffold simple; normalize into days/items later.
+-- Trip Itinerary Planner trips. JSONB keeps the scaffold simple; normalize into days/items later.
 CREATE TABLE IF NOT EXISTS trips (
   id          TEXT PRIMARY KEY,
   user_id     TEXT,

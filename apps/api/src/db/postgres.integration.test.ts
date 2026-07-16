@@ -6,7 +6,7 @@ import type { Db } from "./client";
 import { PostgresTripRepository } from "../repositories/tripRepository";
 import { PostgresOfferRepository, seedIfEmpty } from "../repositories/offerRepository";
 import { PostgresOfferEventRepository } from "../repositories/offerEventRepository";
-import { summarizeOfferEvents, type Trip, type Offer, type OfferEvent } from "@chatr/core";
+import { summarizeOfferEvents, type Trip, type Offer, type OfferEvent } from "@trip-itinerary/core";
 
 let db: Db;
 

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { parseItinerary } from "./parseItinerary";
 import { buildTrip } from "./mockGenerator";
 import { getPois } from "./poi";
-import type { TripPreferences, Poi } from "@chatr/core";
+import type { TripPreferences, Poi } from "@trip-itinerary/core";
 
 const prefs: TripPreferences = {
   destinations: ["Lisbon"], nights: 2, party: "couple", adults: 2, children: 0,

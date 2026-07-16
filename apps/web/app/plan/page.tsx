@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { tokens } from "@chatr/ui";
-import type { Trip, Offer, TripPreferences, ReorderInput } from "@chatr/core";
+import { tokens } from "@trip-itinerary/ui";
+import type { Trip, Offer, TripPreferences, ReorderInput } from "@trip-itinerary/core";
 import { api } from "../../lib/api";
 import { OnboardingForm } from "../components/OnboardingForm";
 import { ItineraryView } from "../components/ItineraryView";
@@ -27,7 +27,7 @@ export default function PlanPage() {
       setTrip(t);
       await refreshOffer(t.id);
     } catch {
-      setError("Could not reach the API. Start it with `pnpm --filter @chatr/api dev`.");
+      setError("Could not reach the API. Start it with `pnpm --filter @trip-itinerary/api dev`.");
     } finally { setLoading(false); }
   }
 

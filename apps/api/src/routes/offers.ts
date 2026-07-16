@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { matchOffers, extractSignals, summarizeOfferEvents, type OfferEvent } from "@chatr/core";
+import { matchOffers, extractSignals, summarizeOfferEvents, type OfferEvent } from "@trip-itinerary/core";
 import { getTripRepository } from "../repositories/tripRepository.js";
 import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";

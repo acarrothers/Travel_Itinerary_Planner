@@ -1,4 +1,4 @@
-# Deploy Chatr to Railway
+# Deploy Trip Itinerary Planner to Railway
 
 Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
 (The mobile app ships separately via Expo EAS → App Store / Play Store.)
@@ -21,12 +21,12 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
    - `DATABASE_URL` = reference the DB: `${{Postgres.DATABASE_URL}}`
    - `GEMINI_API_KEY`, `XAI_API_KEY`, `FOURSQUARE_API_KEY` = your keys
    - `VIATOR_AFFILIATE_ID` = your Viator PID (optional)
-   - `CHATR_API_KEYS` = e.g. `{"admin-key":"admin"}` (optional; omit for open dev mode)
+   - `APP_API_KEYS` = e.g. `{"admin-key":"admin"}` (optional; omit for open dev mode)
    - `CORS_ORIGIN` = your web URL (set in step 4 after the web domain exists)
    - `PGSSL` = `true` **only** if your DB needs SSL and its URL lacks `sslmode=require`
      (leave unset for Railway's internal DATABASE_URL and for Neon URLs).
 5. **Settings → Networking → Generate Domain**. Copy the API URL (e.g.
-   `https://chatr-api-production.up.railway.app`).
+   `https://trip-itinerary-api-production.up.railway.app`).
 6. Verify: open `<api-url>/health` → `{"ok":true,...,"providers":[...]}`.
 
 ## 3. Web service
@@ -40,7 +40,7 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
 
 ## 4. Wire CORS + finish
 1. On the **api** service, set `CORS_ORIGIN` to the web domain from step 3.4
-   (e.g. `https://chatr-web-production.up.railway.app`) and redeploy the API.
+   (e.g. `https://trip-itinerary-web-production.up.railway.app`) and redeploy the API.
 2. Open the web URL → plan a trip. Data now persists in Postgres.
 
 ## Notes

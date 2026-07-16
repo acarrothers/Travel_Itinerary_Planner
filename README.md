@@ -1,6 +1,6 @@
-# Chatr Trip Planner — Monorepo
+# Trip Itinerary Planner — Monorepo
 
-Shared **web + native mobile + API** codebase for Chatr Trip Planner, reflecting the
+Shared **web + native mobile + API** codebase for Trip Itinerary Planner, reflecting the
 decisions in the PRD, MVP Build Plan, and Technical Architecture Outline.
 
 ## Decided stack
@@ -38,9 +38,9 @@ pnpm install
 cp .env.example .env        # add API keys (Anthropic/OpenAI, Google Maps, Viator)
 pnpm dev                    # runs web, mobile, and api via Turborepo
 # or individually:
-pnpm --filter @chatr/api dev
-pnpm --filter @chatr/web dev
-pnpm --filter @chatr/mobile dev
+pnpm --filter @trip-itinerary/api dev
+pnpm --filter @trip-itinerary/web dev
+pnpm --filter @trip-itinerary/mobile dev
 ```
 
 ## Sprint 1 wiring TODOs
@@ -63,19 +63,19 @@ Without `DATABASE_URL`, the API transparently falls back to in-memory repositori
 
 ## CMS admin & RBAC
 - Admin UI: `apps/web` → `/admin` (manage partners, offers, and targeting rules).
-- Roles (`CHATR_API_KEYS` maps API key → role):
+- Roles (`APP_API_KEYS` maps API key → role):
   - **admin** — everything
   - **approver** — read/write + publish (set status=live) + delete
   - **partnerships_manager** — read/write (cannot publish or delete)
   - **analyst** — read-only
-- Leave `CHATR_API_KEYS` unset for **dev mode** (full access). Once set, the admin
+- Leave `APP_API_KEYS` unset for **dev mode** (full access). Once set, the admin
   API enforces RBAC; pass the key in the admin UI's "API key" field.
 
 ## One-command stack (Docker)
 ```bash
 pnpm stack:up      # builds + runs Postgres AND the API (migrates + seeds automatically)
 # API on http://localhost:4000 ; then run the web client:
-pnpm --filter @chatr/web dev
+pnpm --filter @trip-itinerary/web dev
 ```
 `pnpm stack:down` stops everything.
 

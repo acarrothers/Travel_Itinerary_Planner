@@ -1,4 +1,4 @@
-import type { Offer, Partner } from "@chatr/core";
+import type { Offer, Partner } from "@trip-itinerary/core";
 
 // Richer seed catalog so targeting + matching are demoable out of the box.
 export const seedPartners: Partner[] = [

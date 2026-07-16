@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mergeEditedTrip } from "./edit";
-import type { Trip } from "@chatr/core";
+import type { Trip } from "@trip-itinerary/core";
 
 function trip(): Trip {
   return {

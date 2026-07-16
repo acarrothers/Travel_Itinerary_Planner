@@ -5,7 +5,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@chatr/core", "@chatr/api-client", "@chatr/ui"],
+  transpilePackages: ["@trip-itinerary/core", "@trip-itinerary/api-client", "@trip-itinerary/ui"],
   // Type-checking + linting run in CI (`pnpm typecheck` / vitest). Next's bundled
   // type-check trips on @types/react version skew across the pnpm workspace
   // (Expo pins 18.2, web uses 18.3), so we don't run it again at build time.

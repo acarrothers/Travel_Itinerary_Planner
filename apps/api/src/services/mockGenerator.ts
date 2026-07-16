@@ -1,6 +1,6 @@
-import type { Trip, TripPreferences, Item, Day, Poi } from "@chatr/core";
+import type { Trip, TripPreferences, Item, Day, Poi } from "@trip-itinerary/core";
 
-// Deterministic placeholder generator. Pure (depends only on @chatr/core). When
+// Deterministic placeholder generator. Pure (depends only on @trip-itinerary/core). When
 // grounded POIs are supplied it builds items from real places; otherwise it falls
 // back to generic placeholders. Replaced by real AI generation (PRD §6.2).
 const MORNING: Record<string, string> = {

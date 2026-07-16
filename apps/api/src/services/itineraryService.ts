@@ -1,4 +1,4 @@
-import { isValidTrip, attachPoiCoords, type Trip, type TripPreferences } from "@chatr/core";
+import { isValidTrip, attachPoiCoords, type Trip, type TripPreferences } from "@trip-itinerary/core";
 import { getRouter } from "../aiSetup.js";
 import { getPois } from "./poi.js";
 import { parseItinerary } from "./parseItinerary.js";

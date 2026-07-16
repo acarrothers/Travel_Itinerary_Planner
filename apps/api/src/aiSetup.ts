@@ -1,7 +1,7 @@
 import {
   ModelRouter, StubProvider, AnthropicProvider, OpenAIProvider, GeminiProvider, GrokProvider,
   type ProviderAdapter, type RoutingPolicy, type AiTask, type RouteTarget,
-} from "@chatr/ai-orchestration";
+} from "@trip-itinerary/ai-orchestration";
 
 declare const process: { env: Record<string, string | undefined> };
 

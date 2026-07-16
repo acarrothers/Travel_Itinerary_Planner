@@ -1,9 +1,9 @@
 {
-  "name": "chatr",
+  "name": "trip-itinerary-planner",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@9.0.0",
-  "description": "Chatr Trip Planner \u2014 shared monorepo for web + native mobile + API",
+  "description": "Trip Itinerary Planner \u2014 shared monorepo for web + native mobile + API",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "db:up": "docker compose up -d --wait db",
     "db:down": "docker compose down",
-    "db:migrate": "pnpm --filter @chatr/api migrate",
+    "db:migrate": "pnpm --filter @trip-itinerary/api migrate",
     "dev:full": "pnpm db:up && pnpm db:migrate && pnpm dev",
     "stack:up": "docker compose up --build",
     "stack:down": "docker compose down"

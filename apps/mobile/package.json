@@ -1,5 +1,5 @@
 {
-  "name": "@chatr/mobile",
+  "name": "@trip-itinerary/mobile",
   "version": "0.0.0",
   "private": true,
   "main": "index.ts",
@@ -11,9 +11,9 @@
     "lint": "echo \"(mobile) add eslint\""
   },
   "dependencies": {
-    "@chatr/core": "workspace:*",
-    "@chatr/api-client": "workspace:*",
-    "@chatr/ui": "workspace:*",
+    "@trip-itinerary/core": "workspace:*",
+    "@trip-itinerary/api-client": "workspace:*",
+    "@trip-itinerary/ui": "workspace:*",
     "expo": "~51.0.0",
     "expo-status-bar": "~1.12.0",
     "react": "18.2.0",

@@ -11,10 +11,10 @@
     "declaration": true,
     "baseUrl": ".",
     "paths": {
-      "@chatr/core": ["packages/core/src"],
-      "@chatr/ai-orchestration": ["packages/ai-orchestration/src"],
-      "@chatr/api-client": ["packages/api-client/src"],
-      "@chatr/ui": ["packages/ui/src"]
+      "@trip-itinerary/core": ["packages/core/src"],
+      "@trip-itinerary/ai-orchestration": ["packages/ai-orchestration/src"],
+      "@trip-itinerary/api-client": ["packages/api-client/src"],
+      "@trip-itinerary/ui": ["packages/ui/src"]
     }
   }
 }
