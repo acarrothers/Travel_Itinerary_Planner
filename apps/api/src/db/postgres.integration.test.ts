@@ -6,6 +6,7 @@ import type { Db } from "./client";
 import { PostgresTripRepository } from "../repositories/tripRepository";
 import { PostgresOfferRepository, seedIfEmpty } from "../repositories/offerRepository";
 import { PostgresOfferEventRepository } from "../repositories/offerEventRepository";
+import { PostgresUserRepository, seedAccountLimits } from "../repositories/userRepository";
 import { summarizeOfferEvents, type Trip, type Offer, type OfferEvent } from "@trip-itinerary/core";
 
 let db: Db;
@@ -51,5 +52,22 @@ describe("Postgres repositories (real engine)", () => {
     await repo.log(e("conversion", 12));
     const rows = summarizeOfferEvents((await repo.all()).filter((x) => x.offerId === "pg-rep"));
     expect(rows[0]).toMatchObject({ impressions: 1, clicks: 1, conversions: 1, revenueUsd: 12 });
+  });
+
+  it("users + configurable account limits + per-user trip count", async () => {
+    const users = new PostgresUserRepository(db);
+    await seedAccountLimits(users);
+    expect((await users.getAccountLimits()).general).toBe(1);
+
+    await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h" });
+    const back = await users.getByEmail("pg@test.com");
+    expect(back?.passwordHash).toBe("h");
+
+    const tripRepo = new PostgresTripRepository(db);
+    const t = trip("t-count-1"); t.userId = "u-pg";
+    await tripRepo.save(t);
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    expect(await tripRepo.countTripsSince("u-pg", since)).toBe(1);
+    expect(await tripRepo.countTripsSince("someone-else", since)).toBe(0);
   });
 });

@@ -20,6 +20,7 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
 4. **Variables** (Settings → Variables):
    - `DATABASE_URL` = reference the DB: `${{Postgres.DATABASE_URL}}`
    - `GEMINI_API_KEY`, `XAI_API_KEY`, `FOURSQUARE_API_KEY` = your keys
+   - `JWT_SECRET` = a long random string (required — signs login tokens; e.g. `openssl rand -hex 32`)
    - `VIATOR_AFFILIATE_ID` = your Viator PID (optional)
    - `APP_API_KEYS` = e.g. `{"admin-key":"admin"}` (optional; omit for open dev mode)
    - `CORS_ORIGIN` = your web URL (set in step 4 after the web domain exists)
@@ -51,3 +52,13 @@ Hosts the **web app**, the **API**, and **Postgres** in one Railway project.
   (`CREATE TABLE IF NOT EXISTS` + guarded seed).
 - **Alternative:** the repo also has `docker-compose.yml` + `apps/api/Dockerfile` if you
   prefer a container host (Render/Fly.io) — the Dockerfile builds from the repo root.
+
+
+## Accounts & rate limits
+- Every planner action requires a logged-in account (`/auth/register` + `/auth/login`).
+- Daily trip limits are per **account type**, stored in the configurable `account_limits`
+  table and seeded on first boot: `general = 1`, `pro = 25`, `unlimited = -1` (no cap).
+- To change a limit: update `account_limits` (e.g. `UPDATE account_limits SET daily_trip_limit = 3 WHERE account_type = 'general';`).
+- To upgrade a user: `UPDATE users SET account_type = 'pro' WHERE email = '...';`.
+- `JWT_SECRET` **must** be set in production; without it the API falls back to an
+  insecure dev secret and logs a warning.

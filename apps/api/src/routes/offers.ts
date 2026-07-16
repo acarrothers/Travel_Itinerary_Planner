@@ -3,6 +3,7 @@ import { matchOffers, extractSignals, summarizeOfferEvents, type OfferEvent } fr
 import { getTripRepository } from "../repositories/tripRepository.js";
 import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
+import { requireUser, userOf } from "../userAuth.js";
 
 declare const process: { env: Record<string, string | undefined> };
 const trips = getTripRepository();
@@ -12,10 +13,10 @@ const uid = () => Math.random().toString(36).slice(2, 12);
 const now = () => new Date().toISOString();
 
 export async function offerRoutes(app: FastifyInstance) {
-  app.get("/offers/match", async (req) => {
+  app.get("/offers/match", { preHandler: requireUser() }, async (req) => {
     const { tripId, surface } = req.query as { tripId?: string; surface?: string };
     const trip = tripId ? await trips.get(tripId) : undefined;
-    if (!trip) return null;
+    if (!trip || trip.userId !== userOf(req).id) return null;
     const [best] = matchOffers(extractSignals(trip), await offers.listLiveOffers());
     if (best) void events.log({ id: uid(), offerId: best.id, partnerId: best.partnerId, tripId, type: "impression", surface: surface as any, timestamp: now() });
     return best ?? null;

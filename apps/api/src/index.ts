@@ -4,7 +4,9 @@ import cors from "@fastify/cors";
 import { itineraryRoutes } from "./routes/itineraries.js";
 import { offerRoutes } from "./routes/offers.js";
 import { adminRoutes } from "./routes/admin.js";
+import { authRoutes } from "./routes/auth.js";
 import { getOfferRepository, seedIfEmpty } from "./repositories/offerRepository.js";
+import { getUserRepository, seedAccountLimits } from "./repositories/userRepository.js";
 import { availableProviders } from "./aiSetup.js";
 
 const app = Fastify({ logger: true });
@@ -14,9 +16,11 @@ app.get("/health", async () => ({ ok: true, service: "trip-itinerary-api", provi
 app.register(itineraryRoutes);
 app.register(offerRoutes);
 app.register(adminRoutes);
+app.register(authRoutes);
 
 try {
   await seedIfEmpty(getOfferRepository()); // ensure at least the default offer exists
+  await seedAccountLimits(getUserRepository()); // ensure configurable rate limits exist (general=1/24h)
 } catch (e) {
   app.log.warn(`seed skipped: ${(e as Error).message}`);
 }
