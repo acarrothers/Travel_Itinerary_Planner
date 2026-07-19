@@ -75,9 +75,9 @@ const styles = StyleSheet.create({
   meta: { color: tokens.color.mid, fontSize: 12, flex: 1 },
   logout: { color: tokens.color.navy, fontSize: 12, fontWeight: "600" },
   h1: { color: tokens.color.navy, fontSize: tokens.font.h1, fontWeight: "700", marginBottom: tokens.space.sm },
-  err: { color: "#C0392B", marginTop: tokens.space.md },
+  err: { color: tokens.color.danger, marginTop: tokens.space.md },
   editRow: { flexDirection: "row", gap: 8, marginTop: tokens.space.lg },
-  input: { flex: 1, borderWidth: 1, borderColor: "#D5DEEC", borderRadius: tokens.radius.sm, padding: 10, fontSize: 15 },
+  input: { flex: 1, borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.sm, padding: 10, fontSize: 15 },
   apply: { backgroundColor: tokens.color.navy, borderRadius: tokens.radius.sm, paddingHorizontal: 16, justifyContent: "center" },
   applyText: { color: "#fff", fontWeight: "700" },
 });

@@ -73,7 +73,7 @@ export default function AdminPage() {
         <input style={{ ...input, maxWidth: 300 }} placeholder="API key (blank = dev mode)" value={token} onChange={(e) => setToken(e.target.value)} />
         <span style={{ fontSize: 13, color: tokens.color.mid }}>{me ? `Role: ${me.role}` : ""}</span>
       </div>
-      {error && <p style={{ color: "#C0392B" }}>{error}</p>}
+      {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
         <div style={{ gridColumn: "1 / 3", fontWeight: 700, color: tokens.color.navy }}>{form.id ? `Edit: ${form.id}` : "New offer"}</div>
@@ -103,7 +103,7 @@ export default function AdminPage() {
               <input style={input} placeholder={isListOp(r.op) ? "comma,separated" : "value"}
                 value={Array.isArray(r.value) ? r.value.join(", ") : String(r.value ?? "")}
                 onChange={(e) => setRule(i, { value: parseValue(r.op, e.target.value) })} />
-              <button onClick={() => setRules((rs) => rs.filter((_, idx) => idx !== i))} style={{ cursor: "pointer", color: "#C0392B" }}>✕</button>
+              <button onClick={() => setRules((rs) => rs.filter((_, idx) => idx !== i))} style={{ cursor: "pointer", color: tokens.color.danger }}>✕</button>
             </div>
           ))}
           <button onClick={() => setRules((rs) => [...rs, emptyTargetingRule()])} style={{ cursor: "pointer", fontSize: 13 }}>+ Add rule</button>
@@ -121,14 +121,14 @@ export default function AdminPage() {
         </tr></thead>
         <tbody>
           {offers.map((o, i) => (
-            <tr key={o.id} style={{ background: i % 2 ? "#F4F7FC" : "#fff" }}>
+            <tr key={o.id} style={{ background: i % 2 ? tokens.color.surface : "#fff" }}>
               <td style={{ padding: 8 }}>{o.title}</td>
               <td style={{ padding: 8 }}>{o.partnerId}</td>
               <td style={{ padding: 8, color: o.status === "live" ? tokens.color.blue : tokens.color.mid }}>{o.status}</td>
               <td style={{ padding: 8, color: tokens.color.mid, fontSize: 12 }}>{o.targeting.map(describeRule).join(" · ") || "—"}</td>
               <td style={{ padding: 8, textAlign: "right", whiteSpace: "nowrap" }}>
                 <button onClick={() => edit(o)} style={{ marginRight: 6, cursor: "pointer" }}>Edit</button>
-                <button onClick={() => remove(o.id)} style={{ color: "#C0392B", cursor: "pointer" }}>Delete</button>
+                <button onClick={() => remove(o.id)} style={{ color: tokens.color.danger, cursor: "pointer" }}>Delete</button>
               </td>
             </tr>
           ))}

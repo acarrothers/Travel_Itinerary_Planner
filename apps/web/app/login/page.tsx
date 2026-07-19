@@ -96,7 +96,7 @@ export default function LoginPage() {
             </button>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", color: tokens.color.mid, fontSize: 12, margin: "6px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "#E2E8F2" }} /> or <div style={{ flex: 1, height: 1, background: "#E2E8F2" }} />
+            <div style={{ flex: 1, height: 1, background: tokens.color.border }} /> or <div style={{ flex: 1, height: 1, background: tokens.color.border }} />
           </div>
         </div>
       )}
@@ -108,7 +108,7 @@ export default function LoginPage() {
         <label style={{ fontSize: 13, color: tokens.color.mid }}>Password {mode === "signup" && <span>(min 8 characters)</span>}
           <input style={input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
         </label>
-        {error && <p style={{ color: "#C0392B", margin: 0 }}>{error}</p>}
+        {error && <p style={{ color: tokens.color.danger, margin: 0 }}>{error}</p>}
         {notice && <p style={{ color: tokens.color.mid, margin: 0, fontSize: 13 }}>{notice}</p>}
         {mode === "login" && (
           <button type="button" onClick={forgot} style={{ background: "none", border: "none", color: tokens.color.blue, cursor: "pointer", fontSize: 13, alignSelf: "flex-start", padding: 0 }}>

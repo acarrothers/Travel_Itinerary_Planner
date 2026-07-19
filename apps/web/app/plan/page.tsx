@@ -60,18 +60,18 @@ export default function PlanPage() {
     <main style={{ maxWidth: 720, margin: "0 auto", padding: tokens.space.xl }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tokens.space.md }}>
         <div style={{ fontSize: 13, color: tokens.color.mid }}>
-          {user.email} · <span style={{ color: outOfTrips ? "#C0392B" : tokens.color.navy }}>{remainingText}</span>
+          {user.email} · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span>
         </div>
         <button onClick={logout} style={{ background: "none", border: "1px solid #D5DEEC", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Log out</button>
       </div>
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1 }}>Plan a trip</h1>
       {outOfTrips && !trip && (
-        <p style={{ color: "#8A5A12", background: "#FDF6E9", border: "1px solid #EBD9B4", padding: 12, borderRadius: 8 }}>
+        <p style={{ color: tokens.color.warnText, background: tokens.color.warnBg, border: "1px solid #EBD9B4", padding: 12, borderRadius: 8 }}>
           You've used your trip{rate && rate.limit === 1 ? "" : "s"} for today ({rate?.limit}/24h on the {user.accountType} plan). Try again tomorrow.
         </p>
       )}
       <OnboardingForm onGenerate={generate} loading={loading} />
-      {error && <p style={{ color: "#C0392B", marginTop: tokens.space.md }}>{error}</p>}
+      {error && <p style={{ color: tokens.color.danger, marginTop: tokens.space.md }}>{error}</p>}
 
       {trip && (
         <div style={{ marginTop: tokens.space.lg, display: "flex", gap: 8 }}>

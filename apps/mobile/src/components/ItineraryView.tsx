@@ -34,7 +34,7 @@ export function ItineraryView({ trip, onReorder }: { trip: Trip; onReorder?: (mv
 const styles = StyleSheet.create({
   h2: { color: tokens.color.navy, fontSize: tokens.font.h2, fontWeight: "700" },
   day: { color: tokens.color.blue, fontWeight: "700", marginBottom: 4 },
-  row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: "#EEF2F8" },
+  row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: tokens.color.borderSoft },
   time: { color: tokens.color.mid, width: 52, fontSize: 13 },
   title: { flex: 1, color: tokens.color.text },
   move: { color: tokens.color.blue, fontSize: 18, paddingHorizontal: 6, fontWeight: "700" },

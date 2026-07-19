@@ -11,8 +11,8 @@ export default function Home() {
         AI itineraries with itinerary-aware offers — built for web and mobile from one shared core.
       </p>
       <Link href="/login"
-        style={{ display: "inline-block", marginTop: tokens.space.lg, background: tokens.color.blue,
-          color: "#fff", padding: "12px 20px", borderRadius: tokens.radius.md, textDecoration: "none", fontWeight: 600 }}>
+        style={{ display: "inline-block", marginTop: tokens.space.lg, background: tokens.color.accent,
+          color: tokens.color.ink, padding: "12px 20px", borderRadius: tokens.radius.md, textDecoration: "none", fontWeight: 600 }}>
         Log in to plan a trip →
       </Link>
     </main>

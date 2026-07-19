@@ -45,7 +45,7 @@ export default function ReportsPage() {
         <button onClick={seed} style={{ background: tokens.color.blue, color: "#fff", border: "none", padding: "9px 16px", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>Seed demo events</button>
         <button onClick={load} style={{ background: "#fff", border: "1px solid #D5DEEC", padding: "9px 14px", borderRadius: 6, cursor: "pointer" }}>Refresh</button>
       </div>
-      {error && <p style={{ color: "#C0392B" }}>{error}</p>}
+      {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: tokens.space.lg }}>
         {card("Impressions", String(totals.impressions))}
@@ -61,7 +61,7 @@ export default function ReportsPage() {
         <tbody>
           {rows.length === 0 && <tr><td colSpan={9} style={{ padding: 16, color: tokens.color.mid }}>No events yet — click “Seed demo events”.</td></tr>}
           {rows.map((r, i) => (
-            <tr key={r.offerId} style={{ background: i % 2 ? "#F4F7FC" : "#fff" }}>
+            <tr key={r.offerId} style={{ background: i % 2 ? tokens.color.surface : "#fff" }}>
               <td style={{ padding: 8 }}>{r.offerId}</td>
               <td style={{ padding: 8 }}>{r.impressions}</td>
               <td style={{ padding: 8 }}>{r.clicks}</td>
@@ -70,7 +70,7 @@ export default function ReportsPage() {
               <td style={{ padding: 8 }}>{pct(r.conversionRate)}</td>
               <td style={{ padding: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ height: 8, width: 80, background: "#EAF1FD", borderRadius: 4 }}>
+                  <div style={{ height: 8, width: 80, background: tokens.color.light, borderRadius: 4 }}>
                     <div style={{ height: 8, width: `${(r.revenueUsd / maxRev) * 80}px`, background: tokens.color.blue, borderRadius: 4 }} />
                   </div>
                   {usd(r.revenueUsd)}

@@ -32,12 +32,12 @@ export function MapView({ trip }: { trip: Trip }) {
 }
 
 const styles = StyleSheet.create({
-  card: { marginTop: tokens.space.lg, borderWidth: 1, borderColor: "#E2E8F2", borderRadius: tokens.radius.md, padding: tokens.space.md },
+  card: { marginTop: tokens.space.lg, borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.md, padding: tokens.space.md },
   title: { fontWeight: "700", color: tokens.color.navy, marginBottom: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 5 },
   pin: { width: 22, height: 22, borderRadius: 11, backgroundColor: tokens.color.blue, alignItems: "center", justifyContent: "center" },
   pinText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   stop: { flex: 1, color: tokens.color.text, fontSize: 14 },
-  empty: { marginTop: tokens.space.lg, padding: tokens.space.md, borderWidth: 1, borderColor: "#D5DEEC", borderStyle: "dashed", borderRadius: tokens.radius.md },
+  empty: { marginTop: tokens.space.lg, padding: tokens.space.md, borderWidth: 1, borderColor: tokens.color.border, borderStyle: "dashed", borderRadius: tokens.radius.md },
   emptyText: { color: tokens.color.mid, fontSize: 14 },
 });

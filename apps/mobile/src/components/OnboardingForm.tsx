@@ -64,12 +64,12 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
 
 const styles = StyleSheet.create({
   lbl: { fontSize: 13, color: tokens.color.mid, marginBottom: 4 },
-  input: { borderWidth: 1, borderColor: "#D5DEEC", borderRadius: tokens.radius.sm, padding: 10, fontSize: 15 },
+  input: { borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.sm, padding: 10, fontSize: 15 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: { borderWidth: 1, borderColor: "#D5DEEC", borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12 },
+  chip: { borderWidth: 1, borderColor: tokens.color.border, borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12 },
   chipOn: { borderColor: tokens.color.blue, backgroundColor: tokens.color.light },
   chipText: { color: tokens.color.mid, fontSize: 14 },
   chipTextOn: { color: tokens.color.navy },
-  btn: { backgroundColor: tokens.color.blue, borderRadius: tokens.radius.md, padding: 14, alignItems: "center" },
-  btnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  btn: { backgroundColor: tokens.color.accent, borderRadius: tokens.radius.md, padding: 14, alignItems: "center" },
+  btnText: { color: tokens.color.ink, fontWeight: "700", fontSize: 15 },
 });

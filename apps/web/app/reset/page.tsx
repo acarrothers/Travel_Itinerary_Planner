@@ -32,7 +32,7 @@ export default function ResetPage() {
           <label style={{ fontSize: 13, color: tokens.color.mid }}>New password (min 8 characters)
             <input style={input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </label>
-          {error && <p style={{ color: "#C0392B", margin: 0 }}>{error}</p>}
+          {error && <p style={{ color: tokens.color.danger, margin: 0 }}>{error}</p>}
           <button type="submit" disabled={busy}
             style={{ background: tokens.color.blue, color: "#fff", border: "none", padding: 12, borderRadius: 10, fontWeight: 700, cursor: "pointer", opacity: busy ? 0.6 : 1 }}>
             {busy ? "…" : "Update password"}

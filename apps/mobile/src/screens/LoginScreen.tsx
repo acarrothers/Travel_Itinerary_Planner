@@ -55,7 +55,7 @@ export function LoginScreen({ onAuthed }: { onAuthed: () => void }) {
         <Text style={styles.sub}>{mode === "signup" ? "Create an account to start planning." : "Log in to plan your trips."}</Text>
 
         {GOOGLE_ID ? (
-          <Pressable style={[styles.oauth, { borderColor: "#D5DEEC" }]} disabled={!request} onPress={() => promptAsync()}>
+          <Pressable style={[styles.oauth, { borderColor: tokens.color.border }]} disabled={!request} onPress={() => promptAsync()}>
             <Text style={styles.oauthText}>Continue with Google</Text>
           </Pressable>
         ) : null}
@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
   oauthText: { fontWeight: "600", color: tokens.color.navy },
   field: { gap: 4 },
   label: { fontSize: 13, color: tokens.color.mid },
-  input: { borderWidth: 1, borderColor: "#D5DEEC", borderRadius: 8, padding: 10, fontSize: 15 },
-  err: { color: "#C0392B" },
+  input: { borderWidth: 1, borderColor: tokens.color.border, borderRadius: 8, padding: 10, fontSize: 15 },
+  err: { color: tokens.color.danger },
   btn: { backgroundColor: tokens.color.blue, borderRadius: 10, padding: 14, alignItems: "center", marginTop: 4 },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   toggle: { color: tokens.color.blue, textAlign: "center", marginTop: 8 },

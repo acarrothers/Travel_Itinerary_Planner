@@ -55,7 +55,7 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
             return (
               <button type="button" key={i} onClick={() => toggle(i)}
                 style={{ padding: "6px 12px", borderRadius: 999, fontSize: 14, cursor: "pointer",
-                  border: `1px solid ${on ? tokens.color.blue : "#D5DEEC"}`,
+                  border: `1px solid ${on ? tokens.color.blue : tokens.color.border}`,
                   background: on ? tokens.color.light : "#fff", color: on ? tokens.color.navy : tokens.color.mid }}>
                 {i}
               </button>
@@ -64,7 +64,7 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
         </div>
       </div>
       <button type="submit" disabled={loading}
-        style={{ gridColumn: "1 / 3", background: tokens.color.blue, color: "#fff", border: "none",
+        style={{ gridColumn: "1 / 3", background: tokens.color.accent, color: tokens.color.ink, border: "none",
           padding: "12px 20px", borderRadius: tokens.radius.md, fontWeight: 600, fontSize: 15, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
         {loading ? "Generating…" : "Generate itinerary"}
       </button>

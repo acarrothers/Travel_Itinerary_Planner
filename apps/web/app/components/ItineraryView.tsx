@@ -29,7 +29,7 @@ export function ItineraryView({ trip, onReorder }: { trip: Trip; onReorder?: (mv
                 }}
                 style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: "1px solid #EEF2F8", cursor: onReorder ? "grab" : "default" }}
               >
-                {onReorder && <span style={{ color: "#C3CEDF" }}>⋮⋮</span>}
+                {onReorder && <span style={{ color: tokens.color.border }}>⋮⋮</span>}
                 <span style={{ color: tokens.color.mid, width: 52, fontSize: 14 }}>{item.time}</span>
                 <span style={{ flex: 1 }}>{item.title}</span>
                 <span style={{ fontSize: 12, color: tokens.color.mid }}>{item.categoryTags.join(", ")}</span>

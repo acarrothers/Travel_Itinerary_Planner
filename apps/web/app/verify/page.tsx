@@ -15,7 +15,7 @@ export default function VerifyPage() {
       <h1 style={{ color: tokens.color.navy }}>Email verification</h1>
       {status === "working" && <p style={{ color: tokens.color.mid }}>Verifying…</p>}
       {status === "ok" && <p style={{ color: tokens.color.navy }}>✓ Your email is verified. <a href="/plan" style={{ color: tokens.color.blue }}>Go to the planner →</a></p>}
-      {status === "error" && <p style={{ color: "#C0392B" }}>This link is invalid or expired. Log in and resend the verification email.</p>}
+      {status === "error" && <p style={{ color: tokens.color.danger }}>This link is invalid or expired. Log in and resend the verification email.</p>}
     </main>
   );
 }
