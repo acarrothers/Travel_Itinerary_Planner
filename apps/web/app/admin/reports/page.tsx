@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@trip-itinerary/api-client";
 import { tokens } from "@trip-itinerary/ui";
 import type { OfferReportRow } from "@trip-itinerary/core";
+import { AdminGuard } from "../../components/AdminGuard";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -10,7 +11,7 @@ const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 const usd = (n: number) => `$${n.toFixed(2)}`;
 
-export default function ReportsPage() {
+function ReportsPageInner() {
   const [token, setToken] = useState("");
   const client = useMemo(() => createClient(BASE, { authToken: token || undefined }), [token]);
   const [rows, setRows] = useState<OfferReportRow[]>([]);
@@ -83,5 +84,13 @@ export default function ReportsPage() {
         </tbody>
       </table>
     </main>
+  );
+}
+
+export default function ReportsPage() {
+  return (
+    <AdminGuard>
+      <ReportsPageInner />
+    </AdminGuard>
   );
 }

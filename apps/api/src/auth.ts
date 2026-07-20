@@ -28,3 +28,26 @@ export function roleForToken(token: string | undefined, keysJson: string | undef
     return null;
   }
 }
+
+export type AdminAuth =
+  | { ok: true; role: Role | "dev" }
+  | { ok: false; reason: "unauthorized" | "not_configured" };
+
+/**
+ * Decide who the caller is for an admin request. Fails CLOSED: in production a
+ * missing APP_API_KEYS locks the CMS rather than granting the dev bypass, so a
+ * config omission can never silently expose offer management to the internet.
+ * Outside production a missing config still yields the "dev" role for local work.
+ */
+export function resolveAdminAuth(opts: {
+  token?: string;
+  keysJson?: string;
+  isProduction: boolean;
+}): AdminAuth {
+  const { token, keysJson, isProduction } = opts;
+  if (!keysJson) {
+    return isProduction ? { ok: false, reason: "not_configured" } : { ok: true, role: "dev" };
+  }
+  const role = roleForToken(token, keysJson);
+  return role ? { ok: true, role } : { ok: false, reason: "unauthorized" };
+}

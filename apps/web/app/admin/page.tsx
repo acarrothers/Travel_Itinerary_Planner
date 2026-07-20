@@ -4,6 +4,7 @@ import { createClient } from "@trip-itinerary/api-client";
 import { tokens } from "@trip-itinerary/ui";
 import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, describeRule } from "@trip-itinerary/core";
 import type { Offer, TargetingRule } from "@trip-itinerary/core";
+import { AdminGuard } from "../components/AdminGuard";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -14,7 +15,7 @@ const blank: Omit<Offer, "targeting"> = {
   category: "tours", tags: [], priority: 50, surfaces: ["post_generation"], status: "draft",
 };
 
-export default function AdminPage() {
+function AdminPageInner() {
   const [token, setToken] = useState("");
   const client = useMemo(() => createClient(BASE, { authToken: token || undefined }), [token]);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -135,5 +136,13 @@ export default function AdminPage() {
         </tbody>
       </table>
     </main>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <AdminGuard>
+      <AdminPageInner />
+    </AdminGuard>
   );
 }

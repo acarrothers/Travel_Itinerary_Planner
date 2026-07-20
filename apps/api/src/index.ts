@@ -26,6 +26,12 @@ app.register(adminRoutes);
 app.register(authRoutes);
 app.register(destinationRoutes);
 
+// Fail-closed check: in production an unset APP_API_KEYS locks the offers CMS.
+// Warn loudly at boot so the cause is obvious in the deploy logs.
+if (process.env.NODE_ENV === "production" && !process.env.APP_API_KEYS) {
+  app.log.error("[admin] APP_API_KEYS not set — the offers CMS is LOCKED (503). Set it to enable admin access.");
+}
+
 try {
   await seedIfEmpty(getOfferRepository()); // ensure at least the default offer exists
   await seedAccountLimits(getUserRepository()); // ensure configurable rate limits exist (general=1/24h)

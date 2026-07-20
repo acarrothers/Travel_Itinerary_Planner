@@ -3,29 +3,40 @@ import type { Offer, Partner } from "@trip-itinerary/core";
 import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
 import type { OfferEvent } from "@trip-itinerary/core";
-import { can, roleForToken, type Action, type Role } from "../auth.js";
+import { can, resolveAdminAuth, type Action, type Role } from "../auth.js";
 
 declare const process: { env: Record<string, string | undefined> };
 const offers = getOfferRepository();
 const events = getOfferEventRepository();
 const rid = () => Math.random().toString(36).slice(2, 12);
 
-// Resolve the caller's role. If no APP_API_KEYS are configured we run in dev mode
-// (treated as admin) so local development works; once keys are set, RBAC is enforced.
-function resolveRole(req: FastifyRequest): Role | "dev" | null {
-  const keys = process.env.APP_API_KEYS;
-  if (!keys) return "dev";
-  const token = (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-  return roleForToken(token, keys);
+// Resolve the caller's role. Outside production a missing APP_API_KEYS yields the
+// "dev" role so local development works. In production the same omission LOCKS the
+// CMS (503) instead of granting access — the bypass must never reach the internet.
+function resolveRole(req: FastifyRequest) {
+  return resolveAdminAuth({
+    token: (req.headers.authorization ?? "").replace(/^Bearer\s+/i, ""),
+    keysJson: process.env.APP_API_KEYS,
+    isProduction: process.env.NODE_ENV === "production",
+  });
 }
 
 function authHook(action: Action) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
-    const role = resolveRole(req);
-    if (role === null) return reply.code(401).send({ error: "unauthorized" });
-    (req as any).appRole = role;
-    if (role === "dev") return; // dev bypass
-    if (!can(role, action)) return reply.code(403).send({ error: "forbidden", role, action });
+    const auth = resolveRole(req);
+    if (!auth.ok) {
+      if (auth.reason === "not_configured") {
+        req.log.error("Admin CMS locked: APP_API_KEYS is not set in production.");
+        return reply.code(503).send({
+          error: "admin_not_configured",
+          message: "Offer management is disabled until APP_API_KEYS is configured.",
+        });
+      }
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+    (req as any).appRole = auth.role;
+    if (auth.role === "dev") return; // local-only bypass
+    if (!can(auth.role, action)) return reply.code(403).send({ error: "forbidden", role: auth.role, action });
   };
 }
 
