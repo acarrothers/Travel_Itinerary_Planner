@@ -38,6 +38,8 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     resendVerification: () => req<{ ok: boolean }>("/auth/resend-verification", { method: "POST" }),
     forgotPassword: (email: string) => req<{ ok: boolean }>("/auth/forgot", { method: "POST", body: JSON.stringify({ email }) }),
     resetPassword: (token: string, password: string) => req<{ ok: boolean }>("/auth/reset", { method: "POST", body: JSON.stringify({ token, password }) }),
+    // destinations
+    suggestDestinations: (q: string) => req<string[]>(`/destinations/suggest?q=${encodeURIComponent(q)}`),
     // itinerary (auth required server-side)
     createItinerary: (prefs: TripPreferences) => req<Trip & { _rate?: RateLimitStatus }>("/itineraries", { method: "POST", body: JSON.stringify(prefs) }),
     getItinerary: (id: string) => req<Trip>(`/itineraries/${id}`),

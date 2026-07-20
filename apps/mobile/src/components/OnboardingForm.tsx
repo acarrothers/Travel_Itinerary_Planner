@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { tokens } from "@trip-itinerary/ui";
+import { api } from "../lib/api";
 import type { TripPreferences, BudgetBand, PartyType } from "@trip-itinerary/core";
 
 const INTERESTS = ["food", "culture", "adventure", "nature", "history", "nightlife"];
@@ -25,6 +26,20 @@ function Chips<T extends string>({ options, value, onChange }: { options: T[]; v
 
 export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPreferences) => void; loading: boolean }) {
   const [destination, setDestination] = useState("Lisbon");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const skipFetch = useRef(false); // don't re-query right after picking a suggestion
+
+  useEffect(() => {
+    if (skipFetch.current) { skipFetch.current = false; return; }
+    const q = destination.trim();
+    if (q.length < 2) { setSuggestions([]); return; }
+    const t = setTimeout(async () => {
+      try { setSuggestions(await api.suggestDestinations(q)); } catch { setSuggestions([]); }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [destination]);
+
+  function chooseDestination(v: string) { skipFetch.current = true; setDestination(v); setSuggestions([]); }
   const [nights, setNights] = useState("4");
   const [party, setParty] = useState<PartyType>("couple");
   const [budget, setBudget] = useState<BudgetBand>("mid");
@@ -41,7 +56,17 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
     <View style={{ gap: tokens.space.md }}>
       <View>
         <Text style={styles.lbl}>Destination</Text>
-        <TextInput style={styles.input} value={destination} onChangeText={setDestination} />
+        <TextInput style={styles.input} value={destination} onChangeText={setDestination}
+          autoCapitalize="words" autoCorrect={false} placeholder="Start typing a city…" />
+        {suggestions.length > 0 ? (
+          <View style={styles.suggestBox}>
+            {suggestions.map((s) => (
+              <Pressable key={s} onPress={() => chooseDestination(s)} style={styles.suggestItem}>
+                <Text style={styles.suggestText}>{s}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
       </View>
       <View style={{ flexDirection: "row", gap: tokens.space.md }}>
         <View style={{ width: 90 }}>
@@ -65,6 +90,9 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
 const styles = StyleSheet.create({
   lbl: { fontSize: 13, color: tokens.color.mid, marginBottom: 4 },
   input: { borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.sm, padding: 10, fontSize: 15 },
+  suggestBox: { marginTop: 4, borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.sm, backgroundColor: tokens.color.bg, overflow: "hidden" },
+  suggestItem: { paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: tokens.color.borderSoft },
+  suggestText: { fontSize: 15, color: tokens.color.ink },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { borderWidth: 1, borderColor: tokens.color.border, borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12 },
   chipOn: { borderColor: tokens.color.blue, backgroundColor: tokens.color.light },

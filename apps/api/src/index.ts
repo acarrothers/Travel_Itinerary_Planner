@@ -7,6 +7,7 @@ import { itineraryRoutes } from "./routes/itineraries.js";
 import { offerRoutes } from "./routes/offers.js";
 import { adminRoutes } from "./routes/admin.js";
 import { authRoutes } from "./routes/auth.js";
+import { destinationRoutes } from "./routes/destinations.js";
 import { getOfferRepository, seedIfEmpty } from "./repositories/offerRepository.js";
 import { getUserRepository, seedAccountLimits } from "./repositories/userRepository.js";
 import { availableProviders } from "./aiSetup.js";
@@ -23,6 +24,7 @@ app.register(itineraryRoutes);
 app.register(offerRoutes);
 app.register(adminRoutes);
 app.register(authRoutes);
+app.register(destinationRoutes);
 
 try {
   await seedIfEmpty(getOfferRepository()); // ensure at least the default offer exists
