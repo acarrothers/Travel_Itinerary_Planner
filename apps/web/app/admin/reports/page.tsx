@@ -4,6 +4,7 @@ import { createClient } from "@trip-itinerary/api-client";
 import { tokens } from "@trip-itinerary/ui";
 import type { OfferReportRow } from "@trip-itinerary/core";
 import { AdminGuard } from "../../components/AdminGuard";
+import { describeApiError } from "../../../lib/apiError";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -20,11 +21,11 @@ function ReportsPageInner() {
   async function load() {
     setError(null);
     try { setRows(await client.adminReport()); }
-    catch { setError("API not reachable. Run `pnpm --filter @trip-itinerary/api dev`."); }
+    catch (e: any) { setError(describeApiError(e)); }
   }
   useEffect(() => { load(); }, [token]);
 
-  async function seed() { try { await client.adminSeedEvents(); load(); } catch { setError("Seeding needs write permission."); } }
+  async function seed() { try { await client.adminSeedEvents(); load(); } catch (e: any) { setError(`Seeding failed: ${describeApiError(e)}`); } }
 
   const totals = rows.reduce((t, r) => ({ impressions: t.impressions + r.impressions, clicks: t.clicks + r.clicks, conversions: t.conversions + r.conversions, revenue: t.revenue + r.revenueUsd }), { impressions: 0, clicks: 0, conversions: 0, revenue: 0 });
   const maxRev = Math.max(1, ...rows.map((r) => r.revenueUsd));

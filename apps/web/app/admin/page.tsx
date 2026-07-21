@@ -5,6 +5,7 @@ import { tokens } from "@trip-itinerary/ui";
 import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, describeRule } from "@trip-itinerary/core";
 import type { Offer, TargetingRule } from "@trip-itinerary/core";
 import { AdminGuard } from "../components/AdminGuard";
+import { describeApiError } from "../../lib/apiError";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -26,11 +27,17 @@ function AdminPageInner() {
 
   async function load() {
     setError(null);
+    // Load independently: a failure fetching the role shouldn't blank the catalog.
     try {
       setOffers(await client.adminListOffers());
+    } catch (e: any) {
+      setError(describeApiError(e));
+      return;
+    }
+    try {
       setMe(await client.adminMe());
     } catch (e: any) {
-      setError(e?.message?.includes("401") ? "Unauthorized — enter a valid API key." : "API not reachable. Run `pnpm --filter @trip-itinerary/api dev`.");
+      setError(`Loaded offers, but couldn't read your role: ${describeApiError(e)}`);
     }
   }
   useEffect(() => { load(); }, [token]);
@@ -56,11 +63,11 @@ function AdminPageInner() {
       await client.adminSaveOffer(offer);
       setForm(blank); setRules([emptyTargetingRule()]); load();
     } catch (e: any) {
-      setError(e?.message?.includes("403") ? "Forbidden — your role can't do that (publishing needs approver/admin)." : "Save failed.");
+      setError(`Save failed: ${describeApiError(e)}`);
     }
   }
   function edit(o: Offer) { const { targeting, ...rest } = o; setForm(rest); setRules(targeting.length ? targeting : [emptyTargetingRule()]); }
-  async function remove(id: string) { try { await client.adminDeleteOffer(id); load(); } catch { setError("Delete failed (role?)."); } }
+  async function remove(id: string) { try { await client.adminDeleteOffer(id); load(); } catch (e: any) { setError(`Delete failed: ${describeApiError(e)}`); } }
 
   const input: React.CSSProperties = { padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, fontSize: 14, width: "100%" };
   const label: React.CSSProperties = { fontSize: 13, color: tokens.color.mid, display: "block", marginBottom: 4 };
