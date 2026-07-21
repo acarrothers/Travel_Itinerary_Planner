@@ -8,6 +8,9 @@ import { OnboardingForm } from "../components/OnboardingForm";
 import { ItineraryView } from "../components/ItineraryView";
 import { MapView } from "../components/MapView";
 import { OfferCard } from "../components/OfferCard";
+import { OfferDirectory } from "../components/OfferDirectory";
+
+type Tab = "planner" | "directory";
 
 export default function PlanPage() {
   const router = useRouter();
@@ -19,6 +22,7 @@ export default function PlanPage() {
   const [editing, setEditing] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("planner");
 
   // Auth guard: the session lives in an httpOnly cookie; /auth/me confirms it.
   useEffect(() => {
@@ -56,15 +60,36 @@ export default function PlanPage() {
   const remainingText = rate ? (rate.remaining < 0 ? "Unlimited" : `${rate.remaining} of ${rate.limit} left today`) : "";
   const outOfTrips = rate ? (rate.remaining === 0 && rate.limit >= 0) : false;
 
+  const tabBtn = (id: Tab, text: string): React.CSSProperties => ({
+    background: "none", border: "none", cursor: "pointer", fontSize: 15,
+    fontWeight: tab === id ? 700 : 500,
+    color: tab === id ? tokens.color.navy : tokens.color.mid,
+    padding: `${tokens.space.sm}px 2px`, marginRight: tokens.space.lg,
+    borderBottom: `3px solid ${tab === id ? tokens.color.accent : "transparent"}`,
+  });
+
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: tokens.space.xl }}>
+    <main style={{ maxWidth: tab === "directory" ? 960 : 720, margin: "0 auto", padding: tokens.space.xl }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tokens.space.md }}>
         <div style={{ fontSize: 13, color: tokens.color.mid }}>
           {user.email} · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span>
         </div>
         <button onClick={logout} style={{ background: "none", border: "1px solid #D5DEEC", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Log out</button>
       </div>
-      <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1 }}>Plan a trip</h1>
+
+      <nav style={{ display: "flex", borderBottom: `1px solid ${tokens.color.border}`, marginBottom: tokens.space.lg }}>
+        <button style={tabBtn("planner", "Trip Planner")} onClick={() => setTab("planner")}>Trip Planner</button>
+        <button style={tabBtn("directory", "Offer Directory")} onClick={() => setTab("directory")}>Offer Directory</button>
+      </nav>
+
+      {tab === "directory" ? (
+        <>
+          <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Partner Offer Directory</h1>
+          <OfferDirectory />
+        </>
+      ) : (
+      <>
+      <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Plan a trip</h1>
       {outOfTrips && !trip && (
         <p style={{ color: tokens.color.warnText, background: tokens.color.warnBg, border: "1px solid #EBD9B4", padding: 12, borderRadius: 8 }}>
           You've used your trip{rate && rate.limit === 1 ? "" : "s"} for today ({rate?.limit}/24h on the {user.accountType} plan). Try again tomorrow.
@@ -89,6 +114,8 @@ export default function PlanPage() {
       {trip && <ItineraryView trip={trip} onReorder={reorder} />}
       {trip && <MapView trip={trip} />}
       {trip && offer && <OfferCard offer={offer} clickUrl={api.trackOfferClickUrl(offer.id, trip.id)} />}
+      </>
+      )}
     </main>
   );
 }

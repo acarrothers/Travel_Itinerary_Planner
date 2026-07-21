@@ -43,5 +43,18 @@ export async function offerRoutes(app: FastifyInstance) {
     return e;
   });
 
+  // Partner offer directory: every live offer, browsable by a signed-in user.
+  // Read-only and non-targeted — this is the catalog, not the itinerary match.
+  app.get("/offers/directory", { preHandler: requireUser() }, async () => {
+    const live = await offers.listLiveOffers();
+    return live
+      .slice()
+      .sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title))
+      .map((o) => ({
+        id: o.id, partnerId: o.partnerId, title: o.title, subtitle: o.subtitle,
+        body: o.body, ctaLabel: o.ctaLabel, category: o.category, tags: o.tags,
+      }));
+  });
+
   app.get("/offers/report", async () => summarizeOfferEvents(await events.all()));
 }

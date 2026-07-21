@@ -8,6 +8,19 @@ export interface ClientOptions {
 
 export interface AuthResult { token: string; user: User; }
 
+// A public-safe view of a live offer for the partner directory (no targeting rules
+// or raw destination URLs — the click endpoint owns the affiliate redirect).
+export interface DirectoryOffer {
+  id: string;
+  partnerId: string;
+  title: string;
+  subtitle?: string;
+  body?: string;
+  ctaLabel: string;
+  category: string;
+  tags: string[];
+}
+
 // One client shared by the web and React Native apps (both have global `fetch`).
 export function createClient(baseUrl: string, opts: ClientOptions = {}) {
   async function req<T>(path: string, init?: RequestInit): Promise<T> {
@@ -47,8 +60,12 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     reorderItem: (id: string, mv: ReorderInput) => req<Trip>(`/itineraries/${id}/reorder`, { method: "POST", body: JSON.stringify(mv) }),
     // offers
     matchOffer: (tripId: string, surface: string) => req<Offer | null>(`/offers/match?tripId=${tripId}&surface=${surface}`),
+    // Partner offer directory: live catalog browsable by any signed-in user.
+    listOfferDirectory: () => req<DirectoryOffer[]>("/offers/directory"),
     offerReport: () => req<OfferReportRow[]>("/offers/report"),
     trackOfferClickUrl: (offerId: string, tripId: string) => `${baseUrl}/offers/${offerId}/click?tripId=${tripId}`,
+    // Directory clicks have no trip context; still tracked + affiliate-redirected.
+    directoryClickUrl: (offerId: string) => `${baseUrl}/offers/${offerId}/click?source=directory`,
     // admin / CMS
     adminMe: () => req<{ role: string; can: Record<string, boolean> }>("/admin/me"),
     adminListOffers: () => req<Offer[]>("/admin/offers"),
