@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { tokens } from "@trip-itinerary/ui";
+import { pageContainer } from "../lib/layout";
 
 export default function Home() {
   return (
-    <main style={{ maxWidth: 880, margin: "0 auto", padding: tokens.space.xl }}>
+    <main style={pageContainer}>
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginBottom: 8 }}>
         Trip Itinerary <span style={{ color: tokens.color.blue }}>Planner</span>
       </h1>

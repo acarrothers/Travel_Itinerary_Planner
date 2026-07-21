@@ -9,6 +9,7 @@ import { ItineraryView } from "../components/ItineraryView";
 import { MapView } from "../components/MapView";
 import { OfferCard } from "../components/OfferCard";
 import { OfferDirectory } from "../components/OfferDirectory";
+import { pageContainer } from "../../lib/layout";
 
 type Tab = "planner" | "directory";
 
@@ -55,7 +56,7 @@ export default function PlanPage() {
   }
   async function reorder(mv: ReorderInput) { if (trip) setTrip(await api.reorderItem(trip.id, mv)); }
 
-  if (!user) return <main style={{ padding: tokens.space.xl, color: tokens.color.mid }}>Loading…</main>;
+  if (!user) return <main style={{ ...pageContainer, color: tokens.color.mid }}>Loading…</main>;
 
   const remainingText = rate ? (rate.remaining < 0 ? "Unlimited" : `${rate.remaining} of ${rate.limit} left today`) : "";
   const outOfTrips = rate ? (rate.remaining === 0 && rate.limit >= 0) : false;
@@ -69,7 +70,7 @@ export default function PlanPage() {
   });
 
   return (
-    <main style={{ maxWidth: tab === "directory" ? 960 : 720, margin: "0 auto", padding: tokens.space.xl }}>
+    <main style={pageContainer}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tokens.space.md }}>
         <div style={{ fontSize: 13, color: tokens.color.mid }}>
           {user.email} · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
+import { cardContainer } from "../../lib/layout";
 import { api } from "../../lib/api";
 
 export default function ResetPage() {
@@ -25,7 +26,7 @@ export default function ResetPage() {
 
   const input: React.CSSProperties = { width: "100%", padding: "10px 12px", border: "1px solid #D5DEEC", borderRadius: 8, fontSize: 15, marginTop: 4 };
   return (
-    <main style={{ maxWidth: 380, margin: "12vh auto", padding: tokens.space.xl, fontFamily: tokens.font.family }}>
+    <main style={{ ...cardContainer, margin: "8vh auto" }}>
       <h1 style={{ color: tokens.color.navy }}>Set a new password</h1>
       {done ? <p style={{ color: tokens.color.navy }}>✓ Password updated. Redirecting to login…</p> : (
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: tokens.space.md }}>

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
+import { cardContainer } from "../../lib/layout";
 import { api } from "../../lib/api";
 
 declare const process: { env: Record<string, string | undefined> };
@@ -79,7 +80,7 @@ export default function LoginPage() {
   const showSSO = !!(GOOGLE_ID || APPLE_ID);
 
   return (
-    <main style={{ maxWidth: 380, margin: "8vh auto", padding: tokens.space.xl, fontFamily: tokens.font.family }}>
+    <main style={{ ...cardContainer, margin: "8vh auto" }}>
       <h1 style={{ color: tokens.color.navy, fontSize: 28 }}>
         Trip Itinerary <span style={{ color: tokens.color.blue }}>Planner</span>
       </h1>

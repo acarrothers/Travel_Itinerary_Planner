@@ -5,6 +5,7 @@ import { tokens } from "@trip-itinerary/ui";
 import type { OfferReportRow } from "@trip-itinerary/core";
 import { AdminGuard } from "../../components/AdminGuard";
 import { describeApiError } from "../../../lib/apiError";
+import { pageContainer } from "../../../lib/layout";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -38,12 +39,12 @@ function ReportsPageInner() {
   );
 
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: tokens.space.xl, fontFamily: tokens.font.family }}>
+    <main style={pageContainer}>
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginBottom: 4 }}>Offer performance</h1>
       <p style={{ color: tokens.color.mid, marginTop: 0 }}>Funnel by offer — impressions → clicks → conversions → revenue (PRD §13).</p>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", margin: `${tokens.space.md}px 0` }}>
-        <input style={{ padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, maxWidth: 280 }} placeholder="API key (blank = dev mode)" value={token} onChange={(e) => setToken(e.target.value)} />
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: `${tokens.space.md}px 0` }}>
+        <input style={{ padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, maxWidth: 280, flex: "1 1 180px" }} placeholder="API key (blank = dev mode)" value={token} onChange={(e) => setToken(e.target.value)} />
         <button onClick={seed} style={{ background: tokens.color.blue, color: "#fff", border: "none", padding: "9px 16px", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>Seed demo events</button>
         <button onClick={load} style={{ background: "#fff", border: "1px solid #D5DEEC", padding: "9px 14px", borderRadius: 6, cursor: "pointer" }}>Refresh</button>
       </div>
@@ -56,7 +57,8 @@ function ReportsPageInner() {
         {card("Revenue", usd(totals.revenue))}
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+      <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 640 }}>
         <thead><tr style={{ background: tokens.color.navy, color: "#fff", textAlign: "left" }}>
           {["Offer", "Impr.", "Clicks", "CTR", "Conv.", "Conv. rate", "Revenue", "EPC", ""].map((h) => <th key={h} style={{ padding: 8 }}>{h}</th>)}
         </tr></thead>
@@ -84,6 +86,7 @@ function ReportsPageInner() {
           ))}
         </tbody>
       </table>
+      </div>
     </main>
   );
 }

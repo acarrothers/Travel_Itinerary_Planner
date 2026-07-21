@@ -6,6 +6,7 @@ import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, d
 import type { Offer, TargetingRule } from "@trip-itinerary/core";
 import { AdminGuard } from "../components/AdminGuard";
 import { describeApiError } from "../../lib/apiError";
+import { pageContainer } from "../../lib/layout";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -73,7 +74,7 @@ function AdminPageInner() {
   const label: React.CSSProperties = { fontSize: 13, color: tokens.color.mid, display: "block", marginBottom: 4 };
 
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: tokens.space.xl, fontFamily: tokens.font.family }}>
+    <main style={pageContainer}>
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginBottom: 4 }}>Offers CMS</h1>
       <p style={{ color: tokens.color.mid, marginTop: 0 }}>Manage the partner catalog and targeting — no code changes needed.</p>
 
@@ -83,7 +84,7 @@ function AdminPageInner() {
       </div>
       {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
         <div style={{ gridColumn: "1 / 3", fontWeight: 700, color: tokens.color.navy }}>{form.id ? `Edit: ${form.id}` : "New offer"}</div>
         <div><label style={label}>Title</label><input style={input} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
         <div><label style={label}>Partner ID</label><input style={input} value={form.partnerId} onChange={(e) => setForm({ ...form, partnerId: e.target.value })} /></div>
@@ -100,7 +101,7 @@ function AdminPageInner() {
         <div style={{ gridColumn: "1 / 3" }}>
           <label style={label}>Targeting rules (all must match)</label>
           {rules.map((r, i) => (
-            <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "center" }}>
+            <div key={i} style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6, alignItems: "center" }}>
               <select style={{ ...input, width: 130 }} value={r.dimension}
                 onChange={(e) => { const dim = e.target.value as TargetingRule["dimension"]; setRule(i, { dimension: dim, op: OPS_BY_DIMENSION[dim as keyof typeof OPS_BY_DIMENSION][0], value: isListOp(OPS_BY_DIMENSION[dim as keyof typeof OPS_BY_DIMENSION][0]) ? [] : "" }); }}>
                 {TARGETING_DIMENSIONS.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -123,7 +124,8 @@ function AdminPageInner() {
         </div>
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: tokens.space.lg, fontSize: 14 }}>
+      <div style={{ overflowX: "auto", marginTop: tokens.space.lg }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 560 }}>
         <thead><tr style={{ background: tokens.color.navy, color: "#fff", textAlign: "left" }}>
           <th style={{ padding: 8 }}>Title</th><th style={{ padding: 8 }}>Partner</th><th style={{ padding: 8 }}>Status</th><th style={{ padding: 8 }}>Targeting</th><th style={{ padding: 8 }}></th>
         </tr></thead>
@@ -142,6 +144,7 @@ function AdminPageInner() {
           ))}
         </tbody>
       </table>
+      </div>
     </main>
   );
 }

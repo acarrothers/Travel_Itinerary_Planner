@@ -1,0 +1,16 @@
+/* Global responsive baseline shared by every page. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  /* Never let a wide element force horizontal scrolling on small screens. */
+  overflow-x: hidden;
+}
+
+/* Media should scale down inside its container rather than overflow. */
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
+/* Inputs/buttons inherit the page font instead of the UA default. */
+input, button, select, textarea { font-family: inherit; }
