@@ -69,7 +69,7 @@ function AdminPageInner() {
   function edit(o: Offer) { const { targeting, ...rest } = o; setForm(rest); setRules(targeting.length ? targeting : [emptyTargetingRule()]); }
   async function remove(id: string) { try { await client.adminDeleteOffer(id); load(); } catch (e: any) { setError(`Delete failed: ${describeApiError(e)}`); } }
 
-  const input: React.CSSProperties = { padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, fontSize: 14, width: "100%" };
+  const input: React.CSSProperties = { padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, fontSize: 14, width: "100%", boxSizing: "border-box" };
   const label: React.CSSProperties = { fontSize: 13, color: tokens.color.mid, display: "block", marginBottom: 4 };
 
   return (
@@ -83,7 +83,7 @@ function AdminPageInner() {
       </div>
       {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
         <div style={{ gridColumn: "1 / 3", fontWeight: 700, color: tokens.color.navy }}>{form.id ? `Edit: ${form.id}` : "New offer"}</div>
         <div><label style={label}>Title</label><input style={input} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
         <div><label style={label}>Partner ID</label><input style={input} value={form.partnerId} onChange={(e) => setForm({ ...form, partnerId: e.target.value })} /></div>
