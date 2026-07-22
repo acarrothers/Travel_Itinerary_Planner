@@ -4,6 +4,8 @@ import { getTripRepository } from "../repositories/tripRepository.js";
 import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
 import { requireUser, userOf } from "../userAuth.js";
+import { findOffersForTrip } from "../services/offerFinder.js";
+import type { TripPreferences } from "@trip-itinerary/core";
 
 declare const process: { env: Record<string, string | undefined> };
 const trips = getTripRepository();
@@ -12,7 +14,35 @@ const events = getOfferEventRepository();
 const uid = () => Math.random().toString(36).slice(2, 12);
 const now = () => new Date().toISOString();
 
+// Offer search is the primary funnel, so it does NOT consume the daily trip
+// allowance. A per-minute cap still protects against runaway AI spend.
+const findLimit = { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } };
+
 export async function offerRoutes(app: FastifyInstance) {
+  // AI offer finder: destination + preferences in, offers grouped by inferred need out.
+  app.post("/offers/find", { preHandler: requireUser(), ...findLimit }, async (req, reply) => {
+    const prefs = req.body as TripPreferences;
+    if (!prefs?.destinations?.length) {
+      return reply.code(400).send({ error: "destinations required" });
+    }
+    const normalized: TripPreferences = {
+      ...prefs,
+      nights: Number(prefs.nights) || 1,
+      adults: Number(prefs.adults) || 1,
+      children: Number(prefs.children) || 0,
+      interests: Array.isArray(prefs.interests) ? prefs.interests : [],
+    };
+    const result = await findOffersForTrip(normalized, await offers.listOffers());
+    // Log an impression per surfaced offer so the existing funnel reporting covers
+    // directory-sourced discovery too.
+    for (const g of result.groups) {
+      for (const o of g.offers) {
+        void events.log({ id: uid(), offerId: o.id, partnerId: o.partnerId, type: "impression", surface: "post_generation", timestamp: now() });
+      }
+    }
+    return result;
+  });
+
   app.get("/offers/match", { preHandler: requireUser() }, async (req) => {
     const { tripId, surface } = req.query as { tripId?: string; surface?: string };
     const trip = tripId ? await trips.get(tripId) : undefined;

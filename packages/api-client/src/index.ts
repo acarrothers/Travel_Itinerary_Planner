@@ -1,4 +1,4 @@
-import type { Trip, TripPreferences, Offer, OfferReportRow, Partner, ReorderInput, User, RateLimitStatus } from "@trip-itinerary/core";
+import type { Trip, TripPreferences, Offer, OfferReportRow, Partner, ReorderInput, User, RateLimitStatus, NeedGroup } from "@trip-itinerary/core";
 
 export interface ClientOptions {
   authToken?: string;
@@ -7,6 +7,13 @@ export interface ClientOptions {
 }
 
 export interface AuthResult { token: string; user: User; }
+
+// Result of the AI offer finder: offers grouped by the need they satisfy.
+export interface OfferFinderResult {
+  groups: NeedGroup[];
+  aiUsed: boolean;
+  summary?: string;
+}
 
 // A public-safe view of a live offer for the partner directory (no targeting rules
 // or raw destination URLs — the click endpoint owns the affiliate redirect).
@@ -62,6 +69,9 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     matchOffer: (tripId: string, surface: string) => req<Offer | null>(`/offers/match?tripId=${tripId}&surface=${surface}`),
     // Partner offer directory: live catalog browsable by any signed-in user.
     listOfferDirectory: () => req<DirectoryOffer[]>("/offers/directory"),
+    // AI offer finder: preferences in, offers grouped by inferred need out.
+    findOffers: (prefs: TripPreferences) =>
+      req<OfferFinderResult>("/offers/find", { method: "POST", body: JSON.stringify(prefs) }),
     offerReport: () => req<OfferReportRow[]>("/offers/report"),
     trackOfferClickUrl: (offerId: string, tripId: string) => `${baseUrl}/offers/${offerId}/click?tripId=${tripId}`,
     // Directory clicks have no trip context; still tracked + affiliate-redirected.

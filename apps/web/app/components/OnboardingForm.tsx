@@ -6,7 +6,16 @@ import { api } from "../../lib/api";
 
 const INTERESTS = ["food", "culture", "adventure", "nature", "history", "nightlife", "relaxation"];
 
-export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPreferences) => void; loading: boolean }) {
+// Shared preference form. The Offer Finder and the Trip Planner collect the same
+// inputs, so they use this component with different labels.
+export function OnboardingForm({
+  onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Generating…",
+}: {
+  onGenerate: (p: TripPreferences) => void;
+  loading: boolean;
+  submitLabel?: string;
+  loadingLabel?: string;
+}) {
   const [destination, setDestination] = useState("Lisbon");
   const [nights, setNights] = useState(4);
   const [party, setParty] = useState<PartyType>("couple");
@@ -136,7 +145,7 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
       <button type="submit" disabled={loading}
         style={{ gridColumn: "1 / 3", background: tokens.color.accent, color: tokens.color.ink, border: "none",
           padding: "12px 20px", borderRadius: tokens.radius.md, fontWeight: 600, fontSize: 15, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
-        {loading ? "Generating…" : "Generate itinerary"}
+        {loading ? loadingLabel : submitLabel}
       </button>
     </form>
   );

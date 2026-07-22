@@ -9,9 +9,11 @@ import { ItineraryView } from "../components/ItineraryView";
 import { MapView } from "../components/MapView";
 import { OfferCard } from "../components/OfferCard";
 import { OfferDirectory } from "../components/OfferDirectory";
+import { OfferFinder } from "../components/OfferFinder";
 import { pageContainer } from "../../lib/layout";
 
-type Tab = "planner" | "directory";
+// Offer discovery is the primary flow; the itinerary planner is secondary.
+type Tab = "finder" | "planner" | "directory";
 
 export default function PlanPage() {
   const router = useRouter();
@@ -23,7 +25,7 @@ export default function PlanPage() {
   const [editing, setEditing] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("planner");
+  const [tab, setTab] = useState<Tab>("finder");
 
   // Auth guard: the session lives in an httpOnly cookie; /auth/me confirms it.
   useEffect(() => {
@@ -78,12 +80,18 @@ export default function PlanPage() {
         <button onClick={logout} style={{ background: "none", border: "1px solid #D5DEEC", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Log out</button>
       </div>
 
-      <nav style={{ display: "flex", borderBottom: `1px solid ${tokens.color.border}`, marginBottom: tokens.space.lg }}>
+      <nav style={{ display: "flex", flexWrap: "wrap", borderBottom: `1px solid ${tokens.color.border}`, marginBottom: tokens.space.lg }}>
+        <button style={tabBtn("finder", "Find Offers")} onClick={() => setTab("finder")}>Find Offers</button>
+        <button style={tabBtn("directory", "Browse Directory")} onClick={() => setTab("directory")}>Browse Directory</button>
         <button style={tabBtn("planner", "Trip Planner")} onClick={() => setTab("planner")}>Trip Planner</button>
-        <button style={tabBtn("directory", "Offer Directory")} onClick={() => setTab("directory")}>Offer Directory</button>
       </nav>
 
-      {tab === "directory" ? (
+      {tab === "finder" ? (
+        <>
+          <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Find travel offers</h1>
+          <OfferFinder onPlanTrip={(p) => { setTab("planner"); generate(p); }} />
+        </>
+      ) : tab === "directory" ? (
         <>
           <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Partner Offer Directory</h1>
           <OfferDirectory />
