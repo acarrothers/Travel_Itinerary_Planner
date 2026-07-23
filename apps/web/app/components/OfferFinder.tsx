@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { tokens } from "@trip-itinerary/ui";
 import type { TripPreferences } from "@trip-itinerary/core";
+import { isLocalizedOffer } from "@trip-itinerary/core";
 import type { OfferFinderResult } from "@trip-itinerary/api-client";
 import { api } from "../../lib/api";
 import { describeApiError } from "../../lib/apiError";
@@ -78,6 +79,13 @@ export function OfferFinder({ onPlanTrip }: { onPlanTrip?: (p: TripPreferences) 
                     <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1, color: tokens.color.mid }}>
                       Sponsored{o.subtitle ? ` · ${o.subtitle}` : ""}
                     </div>
+                    {isLocalizedOffer(o) && (
+                      <div style={{ display: "inline-block", alignSelf: "flex-start", marginTop: 6, fontSize: 11, fontWeight: 700,
+                        color: tokens.color.teal, background: "#E4F1F2", border: `1px solid ${tokens.color.teal}`,
+                        borderRadius: 999, padding: "2px 8px" }}>
+                        ★ Local experience
+                      </div>
+                    )}
                     <div style={{ fontWeight: 700, color: tokens.color.navy, marginTop: 4 }}>{o.title}</div>
                     {o.body && <div style={{ color: tokens.color.mid, fontSize: 14, marginTop: 4, flex: 1 }}>{o.body}</div>}
                     <a href={api.directoryClickUrl(o.id)} target="_blank" rel="noopener noreferrer sponsored"

@@ -26,6 +26,47 @@ export const seedPartners: Partner[] = [
 ];
 
 export const seedOffers: Offer[] = [
+  // ------------------------------------------------- localized experiences
+  // Place-scoped Viator offers. A `destination` targeting rule makes them local;
+  // they outrank the global tours card for their city (see matchOffers ranking).
+  // destinationUrl paths are Viator city pages as placeholders for affiliate links.
+  {
+    id: "viator-lisbon", partnerId: "viator",
+    title: "Lisbon experiences & day trips", subtitle: "Viator · Lisbon",
+    body: "Sintra day trips, Fado nights and Tagus river cruises, booked with Viator.",
+    ctaLabel: "See Lisbon tours", destinationUrl: "https://www.viator.com/Lisbon/d538",
+    category: "tours", tags: ["culture", "history", "food"],
+    targeting: [{ dimension: "destination", op: "in", value: ["Lisbon"] }],
+    priority: 100, surfaces: ["inline_day", "post_generation"], status: "live",
+  },
+  {
+    id: "viator-paris", partnerId: "viator",
+    title: "Paris tours & skip-the-line tickets", subtitle: "Viator · Paris",
+    body: "Louvre and Eiffel Tower entry, Seine cruises and Versailles day trips.",
+    ctaLabel: "See Paris tours", destinationUrl: "https://www.viator.com/Paris/d479",
+    category: "tours", tags: ["culture", "history", "food"],
+    targeting: [{ dimension: "destination", op: "in", value: ["Paris"] }],
+    priority: 100, surfaces: ["inline_day", "post_generation"], status: "live",
+  },
+  {
+    id: "viator-tokyo", partnerId: "viator",
+    title: "Tokyo experiences & excursions", subtitle: "Viator · Tokyo",
+    body: "Mt Fuji day trips, sushi-making classes and guided city tours.",
+    ctaLabel: "See Tokyo tours", destinationUrl: "https://www.viator.com/Tokyo/d334",
+    category: "tours", tags: ["culture", "food", "adventure"],
+    targeting: [{ dimension: "destination", op: "in", value: ["Tokyo"] }],
+    priority: 100, surfaces: ["inline_day", "post_generation"], status: "live",
+  },
+  {
+    id: "viator-rome", partnerId: "viator",
+    title: "Rome tours & Vatican tickets", subtitle: "Viator · Rome",
+    body: "Colosseum and Vatican skip-the-line entry, food tours and day trips.",
+    ctaLabel: "See Rome tours", destinationUrl: "https://www.viator.com/Rome/d511",
+    category: "tours", tags: ["culture", "history", "food"],
+    targeting: [{ dimension: "destination", op: "in", value: ["Rome"] }],
+    priority: 100, surfaces: ["inline_day", "post_generation"], status: "live",
+  },
+
   // ---------------------------------------------------------------- tours
   {
     id: "viator-tours-generic", partnerId: "viator",
@@ -34,7 +75,7 @@ export const seedOffers: Offer[] = [
     ctaLabel: "See experiences", destinationUrl: "https://www.viator.com/",
     category: "tours", tags: ["culture", "adventure", "food", "history", "nature"],
     targeting: [{ dimension: "interests", op: "contains_any", value: ["culture", "adventure", "food", "history", "nature"] }],
-    priority: 100, surfaces: ["inline_day", "post_generation"], status: "live",
+    priority: 98, surfaces: ["inline_day", "post_generation"], status: "live",
   },
   {
     id: "gyg-culture", partnerId: "getyourguide",

@@ -16,7 +16,7 @@ export function OnboardingForm({
   submitLabel?: string;
   loadingLabel?: string;
 }) {
-  const [destination, setDestination] = useState("Lisbon");
+  const [destination, setDestination] = useState("Lisbon, Portugal");
   const [nights, setNights] = useState(4);
   const [party, setParty] = useState<PartyType>("couple");
   const [budget, setBudget] = useState<BudgetBand>("mid");

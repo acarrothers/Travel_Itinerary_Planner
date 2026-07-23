@@ -38,11 +38,13 @@ function cultureTrip(nights: number): Trip {
 }
 
 describe("seed catalog matching", () => {
-  it("ranks the highest-priority matching live offer first and excludes drafts", async () => {
+  it("ranks the localized offer first for its city, then excludes drafts", async () => {
     const repo = new InMemoryOfferRepository();
     const live = await repo.listLiveOffers();
     const matched = matchOffers(extractSignals(cultureTrip(4)), live);
-    expect(matched[0].id).toBe("viator-tours-generic"); // priority 100
+    // Trip is to Lisbon, so the place-scoped Lisbon offer outranks the global tours card.
+    expect(matched[0].id).toBe("viator-lisbon");
+    expect(matched.some((o) => o.id === "viator-tours-generic")).toBe(true); // global still present, behind
     expect(matched.some((o) => o.id === "gyg-luxury-draft")).toBe(false); // draft excluded
     expect(matched.some((o) => o.id === "safetywing-insurance")).toBe(true); // nights>=1 matches
   });
