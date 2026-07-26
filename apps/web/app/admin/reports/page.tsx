@@ -6,6 +6,7 @@ import type { OfferReportRow } from "@trip-itinerary/core";
 import { AdminGuard } from "../../components/AdminGuard";
 import { describeApiError } from "../../../lib/apiError";
 import { pageContainer } from "../../../lib/layout";
+import { AdminNav } from "../../components/AdminNav";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -40,6 +41,7 @@ function ReportsPageInner() {
 
   return (
     <main style={pageContainer}>
+      <AdminNav />
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginBottom: 4 }}>Offer performance</h1>
       <p style={{ color: tokens.color.mid, marginTop: 0 }}>Funnel by offer — impressions → clicks → conversions → revenue (PRD §13).</p>
 

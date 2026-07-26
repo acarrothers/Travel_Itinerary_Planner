@@ -12,6 +12,7 @@ export interface OfferRepository {
   deleteOffer(id: string): Promise<void>;
   listPartners(): Promise<Partner[]>;
   savePartner(partner: Partner): Promise<Partner>;
+  deletePartner(id: string): Promise<void>;
 }
 
 class InMemoryOfferRepository implements OfferRepository {
@@ -28,6 +29,7 @@ class InMemoryOfferRepository implements OfferRepository {
   async deleteOffer(id: string) { this.offers.delete(id); }
   async listPartners() { return [...this.partners.values()]; }
   async savePartner(p: Partner) { this.partners.set(p.id, p); return p; }
+  async deletePartner(id: string) { this.partners.delete(id); }
 }
 
 class PostgresOfferRepository implements OfferRepository {
@@ -65,6 +67,7 @@ class PostgresOfferRepository implements OfferRepository {
     );
     return p;
   }
+  async deletePartner(id: string) { await this.db.query(`DELETE FROM partners WHERE id = $1`, [id]); }
 }
 
 // Seed a Postgres-backed repo if empty (so a fresh DB still serves an offer).

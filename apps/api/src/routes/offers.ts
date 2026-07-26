@@ -76,12 +76,14 @@ export async function offerRoutes(app: FastifyInstance) {
   // Partner offer directory: every live offer, browsable by a signed-in user.
   // Read-only and non-targeted — this is the catalog, not the itinerary match.
   app.get("/offers/directory", { preHandler: requireUser() }, async () => {
-    const live = await offers.listLiveOffers();
+    const [live, partners] = await Promise.all([offers.listLiveOffers(), offers.listPartners()]);
+    const nameById = new Map(partners.map((p) => [p.id, p.name]));
     return live
       .slice()
       .sort((a, b) => b.priority - a.priority || a.title.localeCompare(b.title))
       .map((o) => ({
-        id: o.id, partnerId: o.partnerId, title: o.title, subtitle: o.subtitle,
+        id: o.id, partnerId: o.partnerId, partnerName: nameById.get(o.partnerId) ?? o.partnerId,
+        title: o.title, subtitle: o.subtitle,
         body: o.body, ctaLabel: o.ctaLabel, category: o.category, tags: o.tags,
       }));
   });

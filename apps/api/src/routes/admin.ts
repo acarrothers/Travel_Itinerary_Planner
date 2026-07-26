@@ -64,6 +64,36 @@ export async function adminRoutes(app: FastifyInstance) {
   app.get("/admin/partners", { preHandler: authHook("read") }, async () => offers.listPartners());
   app.post("/admin/partners", { preHandler: authHook("manage_partners") }, async (req) => offers.savePartner(req.body as Partner));
 
+  // Partner dashboard summary: partners enriched with offer counts + top-line stats.
+  app.get("/admin/partners/summary", { preHandler: authHook("read") }, async () => {
+    const [partners, all] = await Promise.all([offers.listPartners(), offers.listOffers()]);
+    const rows = partners.map((p) => {
+      const own = all.filter((o) => o.partnerId === p.id);
+      return {
+        ...p,
+        totalOffers: own.length,
+        activeOffers: own.filter((o) => o.status === "live").length,
+      };
+    });
+    const stats = {
+      totalPartners: partners.length,
+      activeOffers: all.filter((o) => o.status === "live").length,
+      pendingApprovals: all.filter((o) => o.status === "pending").length,
+    };
+    return { partners: rows, stats };
+  });
+
+  // Delete a partner — blocked while it still has offers, to avoid orphaning them.
+  app.delete("/admin/partners/:id", { preHandler: authHook("manage_partners") }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const own = (await offers.listOffers()).filter((o) => o.partnerId === id);
+    if (own.length > 0) {
+      return reply.code(409).send({ error: "partner_has_offers", message: `Remove or reassign this partner's ${own.length} offer(s) first.` });
+    }
+    await offers.deletePartner(id);
+    return { ok: true };
+  });
+
   // Dev convenience: generate sample funnel events so the dashboard is demoable.
   app.post("/admin/dev/seed-events", { preHandler: authHook("write") }, async () => {
     const live = await offers.listLiveOffers();

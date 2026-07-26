@@ -24,6 +24,16 @@ describe("InMemoryOfferRepository", () => {
     await r.deleteOffer("draft-1");
     expect(await r.getOffer("draft-1")).toBeUndefined();
   });
+  it("creates, updates, and deletes partners", async () => {
+    const r = new InMemoryOfferRepository();
+    const before = (await r.listPartners()).length;
+    await r.savePartner({ id: "acme", name: "Acme Tours", category: "tours", status: "active" });
+    expect((await r.listPartners()).length).toBe(before + 1);
+    await r.savePartner({ id: "acme", name: "Acme Tours", category: "tours", status: "paused" }); // update
+    expect((await r.listPartners()).find((p) => p.id === "acme")!.status).toBe("paused");
+    await r.deletePartner("acme");
+    expect((await r.listPartners()).some((p) => p.id === "acme")).toBe(false);
+  });
 });
 
 import { matchOffers, extractSignals, type Trip } from "@trip-itinerary/core";

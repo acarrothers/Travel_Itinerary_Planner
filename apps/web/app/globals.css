@@ -35,3 +35,10 @@ input:focus, select:focus, textarea:focus {
   border-color: #4B2882 !important;
   box-shadow: 0 0 0 1px #4B2882;
 }
+
+/* Directory: filter rail stacks above the grid on phones, sits beside it on
+   wider screens. Media queries can't live in inline styles, so it's a class. */
+.dir-layout { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
+@media (min-width: 720px) {
+  .dir-layout { grid-template-columns: minmax(0, 220px) minmax(0, 1fr); }
+}

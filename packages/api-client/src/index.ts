@@ -8,6 +8,16 @@ export interface ClientOptions {
 
 export interface AuthResult { token: string; user: User; }
 
+// Partner enriched with offer counts, for the partner-management dashboard.
+export interface PartnerRow extends Partner {
+  totalOffers: number;
+  activeOffers: number;
+}
+export interface PartnerSummary {
+  partners: PartnerRow[];
+  stats: { totalPartners: number; activeOffers: number; pendingApprovals: number };
+}
+
 // Result of the AI offer finder: offers grouped by the need they satisfy.
 export interface OfferFinderResult {
   groups: NeedGroup[];
@@ -20,6 +30,7 @@ export interface OfferFinderResult {
 export interface DirectoryOffer {
   id: string;
   partnerId: string;
+  partnerName: string;
   title: string;
   subtitle?: string;
   body?: string;
@@ -85,6 +96,8 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     adminSeedEvents: () => req<{ seeded: number }>("/admin/dev/seed-events", { method: "POST" }),
     adminListPartners: () => req<Partner[]>("/admin/partners"),
     adminSavePartner: (p: Partner) => req<Partner>("/admin/partners", { method: "POST", body: JSON.stringify(p) }),
+    adminDeletePartner: (id: string) => req<{ ok: boolean }>(`/admin/partners/${id}`, { method: "DELETE" }),
+    adminPartnerSummary: () => req<PartnerSummary>("/admin/partners/summary"),
   };
 }
 export type ApiClient = ReturnType<typeof createClient>;
