@@ -6,7 +6,7 @@ import { isLocalizedOffer } from "@trip-itinerary/core";
 import type { OfferFinderResult } from "@trip-itinerary/api-client";
 import { api } from "../../lib/api";
 import { describeApiError } from "../../lib/apiError";
-import { OnboardingForm } from "./OnboardingForm";
+import { OnboardingForm, type OnboardingInitial } from "./OnboardingForm";
 import { PartnerOfferCard } from "./PartnerOfferCard";
 
 /**
@@ -18,7 +18,7 @@ import { PartnerOfferCard } from "./PartnerOfferCard";
  * "Sponsored" and the results carry a standing disclosure. Users should always be
  * able to tell recommendation from advertising.
  */
-export function OfferFinder({ onPlanTrip }: { onPlanTrip?: (p: TripPreferences) => void }) {
+export function OfferFinder({ onPlanTrip, initial }: { onPlanTrip?: (p: TripPreferences) => void; initial?: OnboardingInitial }) {
   const [result, setResult] = useState<OfferFinderResult | null>(null);
   const [prefs, setPrefs] = useState<TripPreferences | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export function OfferFinder({ onPlanTrip }: { onPlanTrip?: (p: TripPreferences) 
         Tell us about your trip and we'll work out what you need to sort out — then find partner deals for each.
       </p>
 
-      <OnboardingForm onGenerate={find} loading={loading} submitLabel="Find offers" loadingLabel="Finding offers…" />
+      <OnboardingForm onGenerate={find} loading={loading} submitLabel="Find offers" loadingLabel="Finding offers…" initial={initial} />
 
       {error && <p style={{ color: tokens.color.danger, marginTop: tokens.space.md }}>{error}</p>}
 

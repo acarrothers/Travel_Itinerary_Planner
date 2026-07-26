@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
-import type { Trip, Offer, TripPreferences, ReorderInput, User, RateLimitStatus } from "@trip-itinerary/core";
+import type { Trip, Offer, TripPreferences, ReorderInput, User, RateLimitStatus, BudgetBand, PartyType } from "@trip-itinerary/core";
 import { api } from "../../lib/api";
-import { OnboardingForm } from "../components/OnboardingForm";
+import { OnboardingForm, type OnboardingInitial } from "../components/OnboardingForm";
 import { ItineraryView } from "../components/ItineraryView";
 import { MapView } from "../components/MapView";
 import { OfferCard } from "../components/OfferCard";
@@ -15,8 +15,28 @@ import { pageContainer } from "../../lib/layout";
 // Offer discovery is the primary flow; the itinerary planner is secondary.
 type Tab = "finder" | "planner" | "directory";
 
-export default function PlanPage() {
+const PARTIES: PartyType[] = ["solo", "couple", "family", "friends"];
+
+// Translate the landing page's "Travel style" into our preference fields.
+function initialFromParams(p: URLSearchParams): OnboardingInitial | undefined {
+  const dest = p.get("dest") ?? undefined;
+  const partyRaw = (p.get("party") ?? "").toLowerCase();
+  const party = PARTIES.includes(partyRaw as PartyType) ? (partyRaw as PartyType) : undefined;
+  const style = (p.get("style") ?? "").toLowerCase();
+  let budget: BudgetBand | undefined;
+  let interests: string[] | undefined;
+  if (style === "budget") budget = "budget";
+  else if (style === "luxury") budget = "luxury";
+  else if (style === "adventure") interests = ["adventure", "nature"];
+  else if (style === "relaxing") interests = ["relaxation"];
+  if (!dest && !party && !budget && !interests) return undefined;
+  return { destination: dest, party, budget, interests };
+}
+
+function PlanPageInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const initial = useMemo(() => initialFromParams(params), [params]);
   const [user, setUser] = useState<User | null>(null);
   const [rate, setRate] = useState<RateLimitStatus | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -25,7 +45,7 @@ export default function PlanPage() {
   const [editing, setEditing] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("finder");
+  const [tab, setTab] = useState<Tab>(params.get("intent") === "planner" ? "planner" : "finder");
 
   // Auth guard: the session lives in an httpOnly cookie; /auth/me confirms it.
   useEffect(() => {
@@ -89,7 +109,7 @@ export default function PlanPage() {
       {tab === "finder" ? (
         <>
           <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Find travel offers</h1>
-          <OfferFinder onPlanTrip={(p) => { setTab("planner"); generate(p); }} />
+          <OfferFinder initial={initial} onPlanTrip={(p) => { setTab("planner"); generate(p); }} />
         </>
       ) : tab === "directory" ? (
         <>
@@ -104,7 +124,7 @@ export default function PlanPage() {
           You've used your trip{rate && rate.limit === 1 ? "" : "s"} for today ({rate?.limit}/24h on the {user.accountType} plan). Try again tomorrow.
         </p>
       )}
-      <OnboardingForm onGenerate={generate} loading={loading} />
+      <OnboardingForm onGenerate={generate} loading={loading} initial={initial} />
       {error && <p style={{ color: tokens.color.danger, marginTop: tokens.space.md }}>{error}</p>}
 
       {trip && (
@@ -126,5 +146,13 @@ export default function PlanPage() {
       </>
       )}
     </main>
+  );
+}
+
+export default function PlanPage() {
+  return (
+    <Suspense fallback={null}>
+      <PlanPageInner />
+    </Suspense>
   );
 }

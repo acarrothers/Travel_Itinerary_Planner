@@ -8,20 +8,28 @@ const INTERESTS = ["food", "culture", "adventure", "nature", "history", "nightli
 
 // Shared preference form. The Offer Finder and the Trip Planner collect the same
 // inputs, so they use this component with different labels.
+export interface OnboardingInitial {
+  destination?: string;
+  party?: PartyType;
+  budget?: BudgetBand;
+  interests?: string[];
+}
+
 export function OnboardingForm({
-  onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Generating…",
+  onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Generating…", initial,
 }: {
   onGenerate: (p: TripPreferences) => void;
   loading: boolean;
   submitLabel?: string;
   loadingLabel?: string;
+  initial?: OnboardingInitial; // prefill, e.g. from the landing-page handoff
 }) {
-  const [destination, setDestination] = useState("Lisbon, Portugal");
+  const [destination, setDestination] = useState(initial?.destination || "Lisbon, Portugal");
   const [nights, setNights] = useState(4);
-  const [party, setParty] = useState<PartyType>("couple");
-  const [budget, setBudget] = useState<BudgetBand>("mid");
+  const [party, setParty] = useState<PartyType>(initial?.party ?? "couple");
+  const [budget, setBudget] = useState<BudgetBand>(initial?.budget ?? "mid");
   const [pace, setPace] = useState<Pace>("balanced");
-  const [interests, setInterests] = useState<string[]>(["food", "culture"]);
+  const [interests, setInterests] = useState<string[]>(initial?.interests ?? ["food", "culture"]);
 
   // --- destination autocomplete ---
   const [suggestions, setSuggestions] = useState<string[]>([]);

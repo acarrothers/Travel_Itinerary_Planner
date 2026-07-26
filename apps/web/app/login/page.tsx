@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import { cardContainer } from "../../lib/layout";
 import { api } from "../../lib/api";
@@ -19,8 +19,9 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +29,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const googleBtn = useRef<HTMLDivElement | null>(null);
 
-  function finish() { router.push("/plan"); }
+  // Honor a ?next= redirect from the landing page, but only same-origin paths
+  // (must start with a single "/") to avoid an open-redirect.
+  function finish() {
+    const next = params.get("next");
+    const safe = next && /^\/(?!\/)/.test(next) ? next : "/plan";
+    router.push(safe);
+  }
   async function ssoLogin(provider: "google" | "apple", idToken: string) {
     try { await api.oauthLogin(provider, idToken); finish(); }
     catch (e: any) { setError(e?.message ?? `${provider} sign-in failed`); }
@@ -129,5 +136,13 @@ export default function LoginPage() {
         </button>
       </p>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginInner />
+    </Suspense>
   );
 }
