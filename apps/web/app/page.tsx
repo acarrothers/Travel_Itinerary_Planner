@@ -3,37 +3,36 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
+import type { TripPreferences, BudgetBand } from "@trip-itinerary/core";
+import type { OfferFinderResult } from "@trip-itinerary/api-client";
+import { api } from "../lib/api";
+import { describeApiError } from "../lib/apiError";
+import { OnboardingForm } from "./components/OnboardingForm";
+import { OfferResults } from "./components/OfferResults";
 
-// Public smart-search landing (Vibrant Voyager "global landing" design). Auth is
-// required to actually run anything, so the two CTAs carry the entered trip into
-// /login via a `next` URL; after signing in the user lands in the finder/planner
-// with the form prefilled.
+// Public smart-search landing (Vibrant Voyager "global landing" design). Guests
+// can find partner offers inline here without logging in; "Plan Trip Itinerary"
+// carries the trip into the planner.
 export default function Home() {
   const router = useRouter();
-  const [destination, setDestination] = useState("");
-  const [dates, setDates] = useState("");
-  const [party, setParty] = useState("Solo");
-  const [style, setStyle] = useState("Adventure");
+  const [result, setResult] = useState<OfferFinderResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function go(intent: "offers" | "planner") {
-    const trip = new URLSearchParams();
-    trip.set("intent", intent);
-    if (destination.trim()) trip.set("dest", destination.trim());
-    trip.set("party", party.toLowerCase());
-    trip.set("style", style.toLowerCase());
-    const next = `/plan?${trip.toString()}`;
-    router.push(`/login?next=${encodeURIComponent(next)}`);
+  // "See Partner Offers" — run the finder right here, no login.
+  async function findOffers(p: TripPreferences) {
+    setLoading(true); setError(null); setResult(null);
+    try { setResult(await api.findOffers(p)); }
+    catch (e: any) { setError(describeApiError(e)); }
+    finally { setLoading(false); }
   }
 
-  const labelCaps: React.CSSProperties = {
-    fontFamily: tokens.font.mono, fontSize: tokens.font.caps, letterSpacing: "0.05em",
-    textTransform: "uppercase", color: tokens.color.muted, marginBottom: 4, display: "block",
-  };
-  const field: React.CSSProperties = {
-    width: "100%", boxSizing: "border-box", padding: "12px 14px",
-    border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.md,
-    fontSize: tokens.font.body, background: tokens.color.bg, color: tokens.color.ink,
-  };
+  // "Plan Trip Itinerary" — hand the trip to the planner (guests welcome there too).
+  function planTrip(p: TripPreferences) {
+    const style: Record<BudgetBand, string> = { budget: "budget", mid: "adventure", luxury: "luxury" };
+    const q = new URLSearchParams({ intent: "planner", dest: p.destinations[0] ?? "", party: p.party, style: style[p.budget] });
+    router.push(`/plan?${q.toString()}`);
+  }
 
   return (
     <div style={{ fontFamily: tokens.font.family, color: tokens.color.ink }}>
@@ -69,53 +68,27 @@ export default function Home() {
             Tell us about your next trip
           </h1>
 
-          {/* Smart-search card */}
+          {/* Smart-search card — same fields as the /plan finder. */}
           <div style={{
-            maxWidth: 860, margin: "0 auto", background: "rgba(255,255,255,0.92)",
+            maxWidth: 620, margin: "0 auto", background: "rgba(255,255,255,0.94)",
             border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.lg,
             padding: "clamp(20px, 3vw, 28px)", boxShadow: "0 8px 24px rgba(31,31,31,0.10)",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: tokens.space.md }}>
-              <div>
-                <label style={labelCaps}>Destination</label>
-                <input style={field} value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="e.g., Paris, Tokyo, London" />
-              </div>
-              <div>
-                <label style={labelCaps}>Dates</label>
-                <input style={field} value={dates} onChange={(e) => setDates(e.target.value)} placeholder="Select dates" />
-              </div>
-              <div>
-                <label style={labelCaps}>Who's going</label>
-                <select style={field} value={party} onChange={(e) => setParty(e.target.value)}>
-                  <option>Solo</option><option>Couple</option><option>Family</option><option>Friends</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelCaps}>Travel style</label>
-                <select style={field} value={style} onChange={(e) => setStyle(e.target.value)}>
-                  <option>Adventure</option><option>Relaxing</option><option>Budget</option><option>Luxury</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: tokens.space.md, marginTop: tokens.space.lg }}>
-              <button onClick={() => go("offers")} style={{
-                flex: "1 1 220px", background: tokens.color.bg, color: tokens.color.primary,
-                border: `2px solid ${tokens.color.primary}`, borderRadius: tokens.radius.lg,
-                padding: "12px 20px", fontFamily: tokens.font.heading, fontWeight: 700, fontSize: tokens.font.body, cursor: "pointer",
-              }}>See Partner Offers</button>
-              <button onClick={() => go("planner")} style={{
-                flex: "1 1 220px", background: tokens.color.accent, color: tokens.color.primaryDark,
-                border: "none", borderRadius: tokens.radius.lg,
-                padding: "12px 20px", fontFamily: tokens.font.heading, fontWeight: 700, fontSize: tokens.font.body, cursor: "pointer",
-              }}>✦ Plan Trip Itinerary</button>
-            </div>
-            <p style={{ color: tokens.color.muted, fontSize: tokens.font.small, marginTop: tokens.space.md, marginBottom: 0, textAlign: "center" }}>
-              You'll sign in to continue — your trip details carry over.
+            <OnboardingForm
+              onGenerate={findOffers} loading={loading}
+              submitLabel="See Partner Offers" loadingLabel="Finding offers…"
+              secondaryLabel="✦ Plan Trip Itinerary" onSecondary={planTrip}
+            />
+            <p style={{ color: tokens.color.muted, fontSize: tokens.font.small, marginTop: tokens.space.md, marginBottom: 0 }}>
+              No account needed to see offers. Log in to save an itinerary.
             </p>
           </div>
           </div>
         </div>
+
+        {/* Inline offer results (guests welcome). */}
+        {error && <p style={{ color: tokens.color.danger, marginTop: tokens.space.lg }}>{error}</p>}
+        {result && <OfferResults result={result} />}
       </main>
 
       {/* Footer */}

@@ -17,12 +17,15 @@ export interface OnboardingInitial {
 
 export function OnboardingForm({
   onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Generating…", initial,
+  secondaryLabel, onSecondary,
 }: {
   onGenerate: (p: TripPreferences) => void;
   loading: boolean;
   submitLabel?: string;
   loadingLabel?: string;
   initial?: OnboardingInitial; // prefill, e.g. from the landing-page handoff
+  secondaryLabel?: string;               // optional 2nd action using the same fields
+  onSecondary?: (p: TripPreferences) => void;
 }) {
   const [destination, setDestination] = useState(initial?.destination || "Lisbon, Portugal");
   const [nights, setNights] = useState(4);
@@ -75,9 +78,10 @@ export function OnboardingForm({
   const toggle = (i: string) =>
     setInterests((cur) => (cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]));
 
+  const collect = (): TripPreferences => ({ destinations: [destination], nights, party, adults: 2, children: 0, budget, interests, pace });
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    onGenerate({ destinations: [destination], nights, party, adults: 2, children: 0, budget, interests, pace });
+    onGenerate(collect());
   }
 
   const field: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4, fontSize: 14, color: tokens.color.mid };
@@ -150,12 +154,22 @@ export function OnboardingForm({
           })}
         </div>
       </div>
-      <button type="submit" disabled={loading}
-        style={{ gridColumn: "1 / 3", background: tokens.color.accent, color: tokens.color.primaryDark, border: "none",
-          padding: "12px 20px", borderRadius: tokens.radius.lg, fontFamily: tokens.font.heading, fontWeight: 700,
-          fontSize: tokens.font.body, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
-        {loading ? loadingLabel : submitLabel}
-      </button>
+      <div style={{ gridColumn: "1 / 3", display: "flex", flexWrap: "wrap", gap: tokens.space.md }}>
+        <button type="submit" disabled={loading}
+          style={{ flex: secondaryLabel ? "1 1 200px" : "1 1 100%", background: tokens.color.accent, color: tokens.color.primaryDark, border: "none",
+            padding: "12px 20px", borderRadius: tokens.radius.lg, fontFamily: tokens.font.heading, fontWeight: 700,
+            fontSize: tokens.font.body, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
+          {loading ? loadingLabel : submitLabel}
+        </button>
+        {secondaryLabel && onSecondary && (
+          <button type="button" disabled={loading} onClick={() => onSecondary(collect())}
+            style={{ flex: "1 1 200px", background: tokens.color.bg, color: tokens.color.primary,
+              border: `2px solid ${tokens.color.primary}`, padding: "12px 20px", borderRadius: tokens.radius.lg,
+              fontFamily: tokens.font.heading, fontWeight: 700, fontSize: tokens.font.body, cursor: "pointer" }}>
+            {secondaryLabel}
+          </button>
+        )}
+      </div>
     </form>
   );
 }
