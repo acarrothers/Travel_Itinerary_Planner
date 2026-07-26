@@ -9,3 +9,4 @@ export * from "./grounding";
 export * from "./accounts";
 export * from "./destinations";
 export * from "./needs";
+export * from "./partnerCsv";

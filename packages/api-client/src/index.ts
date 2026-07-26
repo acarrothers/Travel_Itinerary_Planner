@@ -17,6 +17,12 @@ export interface PartnerSummary {
   partners: PartnerRow[];
   stats: { totalPartners: number; activeOffers: number; pendingApprovals: number };
 }
+export interface PartnerImportResult {
+  imported: number;
+  created: number;
+  updated: number;
+  errors: string[];
+}
 
 // Result of the AI offer finder: offers grouped by the need they satisfy.
 export interface OfferFinderResult {
@@ -98,6 +104,8 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     adminSavePartner: (p: Partner) => req<Partner>("/admin/partners", { method: "POST", body: JSON.stringify(p) }),
     adminDeletePartner: (id: string) => req<{ ok: boolean }>(`/admin/partners/${id}`, { method: "DELETE" }),
     adminPartnerSummary: () => req<PartnerSummary>("/admin/partners/summary"),
+    adminImportPartners: (csv: string) =>
+      req<PartnerImportResult>("/admin/partners/import", { method: "POST", body: JSON.stringify({ csv }) }),
   };
 }
 export type ApiClient = ReturnType<typeof createClient>;

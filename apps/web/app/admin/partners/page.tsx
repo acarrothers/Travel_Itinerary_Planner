@@ -21,6 +21,7 @@ function PartnersInner() {
   const [form, setForm] = useState<Partner>(blank);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
 
   async function load() {
     setError(null);
@@ -43,6 +44,18 @@ function PartnersInner() {
     try { await client.adminDeletePartner(p.id); load(); }
     catch (e: any) { setError(describeApiError(e)); }
   }
+  async function importCsv(file: File) {
+    setError(null); setImportMsg(null);
+    try {
+      const text = await file.text();
+      const res = await client.adminImportPartners(text);
+      const parts = [`Imported ${res.imported} partner(s): ${res.created} created, ${res.updated} updated`];
+      if (res.errors.length) parts.push(`${res.errors.length} row(s) skipped: ${res.errors.slice(0, 3).join(" ")}`);
+      setImportMsg(parts.join(". "));
+      load();
+    } catch (e: any) { setError(`Import failed: ${describeApiError(e)}`); }
+  }
+
   function edit(p: PartnerRow) {
     setForm({ id: p.id, name: p.name, category: p.category, status: p.status, logoUrl: p.logoUrl });
     setEditing(true);
@@ -67,7 +80,13 @@ function PartnersInner() {
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", margin: `${tokens.space.md}px 0` }}>
         <input style={{ ...input, maxWidth: 300, flex: "1 1 180px" }} placeholder="API key (blank = dev mode)" value={token} onChange={(e) => setToken(e.target.value)} />
+        <label style={{ background: tokens.color.bg, border: `1px solid ${tokens.color.border}`, padding: "9px 16px", borderRadius: tokens.radius.lg, cursor: "pointer", fontFamily: tokens.font.heading, fontWeight: 700, color: tokens.color.primaryDark, fontSize: 14 }}>
+          Import CSV
+          <input type="file" accept=".csv,text/csv" style={{ display: "none" }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) importCsv(f); e.target.value = ""; }} />
+        </label>
       </div>
+      {importMsg && <p style={{ color: tokens.color.teal, fontSize: 14 }}>{importMsg}</p>}
       {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
       {data && (

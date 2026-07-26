@@ -130,4 +130,10 @@ export interface Partner {
   category: string;
   status: "active" | "paused";
   logoUrl?: string;
+  // Onboarding metadata (from the partner reference sheet).
+  serviceType?: string;      // e.g. "Hotels & Property Bookings"
+  subCategory?: string;      // e.g. "Accommodations"
+  offerLevel?: "global" | "local"; // whether the brand's offers are global or localized
+  affiliateProgram?: boolean;      // has an affiliate/commission program
+  offerApiLink?: string;           // partner offer API docs, when available
 }

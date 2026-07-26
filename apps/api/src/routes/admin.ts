@@ -4,6 +4,7 @@ import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
 import type { OfferEvent } from "@trip-itinerary/core";
 import { can, resolveAdminAuth, type Action, type Role } from "../auth.js";
+import { parsePartnerCsv } from "@trip-itinerary/core";
 
 declare const process: { env: Record<string, string | undefined> };
 const offers = getOfferRepository();
@@ -81,6 +82,21 @@ export async function adminRoutes(app: FastifyInstance) {
       pendingApprovals: all.filter((o) => o.status === "pending").length,
     };
     return { partners: rows, stats };
+  });
+
+  // Bulk-onboard partners from a CSV upload (the partner reference sheet).
+  // Upserts by slug; existing partners are updated, new ones created.
+  app.post("/admin/partners/import", { preHandler: authHook("manage_partners") }, async (req, reply) => {
+    const { csv } = (req.body ?? {}) as { csv?: string };
+    if (!csv || typeof csv !== "string") return reply.code(400).send({ error: "csv text required" });
+    const { partners, errors } = parsePartnerCsv(csv);
+    const existingIds = new Set((await offers.listPartners()).map((p) => p.id));
+    let created = 0, updated = 0;
+    for (const p of partners) {
+      existingIds.has(p.id) ? updated++ : created++;
+      await offers.savePartner(p);
+    }
+    return { imported: partners.length, created, updated, errors };
   });
 
   // Delete a partner — blocked while it still has offers, to avoid orphaning them.
