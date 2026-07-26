@@ -43,6 +43,26 @@ describe("accounts + rate limiting", () => {
     expect(await trips.countTripsSince("guest:9.9.9.9", dayAgo())).toBe(1);
   });
 
+  it("caps guests at 1 itinerary/24h, members at 5", async () => {
+    const users = new InMemoryUserRepository();
+    await seedAccountLimits(users);
+    const limits = await users.getAccountLimits();
+    expect(dailyLimitFor("guest", limits, 1)).toBe(1);
+    expect(dailyLimitFor("general", limits)).toBe(5);
+    expect(evaluateRateLimit(1, dailyLimitFor("guest", limits, 1)).allowed).toBe(false); // guest 2nd blocked
+    expect(evaluateRateLimit(4, dailyLimitFor("general", limits)).allowed).toBe(true);    // member 5th allowed
+  });
+
+  it("lists a user's saved itineraries, newest first", async () => {
+    const trips = new InMemoryTripRepository();
+    await trips.save(mkTrip("u1", iso(Date.now() - 2000)));
+    await trips.save(mkTrip("u1", iso(Date.now() - 1000)));
+    await trips.save(mkTrip("other", now()));
+    const mine = await trips.listByUser("u1");
+    expect(mine).toHaveLength(2);
+    expect(mine[0].createdAt >= mine[1].createdAt).toBe(true);
+  });
+
   it("stores + fetches a user by email (hash stays internal)", async () => {
     const users = new InMemoryUserRepository();
     const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash", provider: "password", emailVerified: false });

@@ -9,7 +9,8 @@ export interface StoredUser extends User {
   emailVerified: boolean;
 }
 
-export const DEFAULT_ACCOUNT_LIMITS: Record<string, number> = { general: 5, pro: 25, unlimited: -1 };
+// `guest` = anonymous (per-IP) allowance; `general` = signed-in baseline.
+export const DEFAULT_ACCOUNT_LIMITS: Record<string, number> = { guest: 1, general: 5, pro: 25, unlimited: -1 };
 const LEGACY_GENERAL_LIMIT = 1; // baseline before guests + 5/24h; migrated forward on boot
 const uid = () => Math.random().toString(36).slice(2, 14);
 

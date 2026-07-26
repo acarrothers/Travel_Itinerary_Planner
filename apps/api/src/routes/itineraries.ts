@@ -26,18 +26,24 @@ export async function itineraryRoutes(app: FastifyInstance) {
     // Rate-limit key + limit: member account vs anonymous IP. Guests use the
     // configurable "general" limit so one knob controls the baseline.
     const key = user ? user.id : `guest:${clientIp(req)}`;
-    const limit = user ? dailyLimitFor(user.accountType, limits) : dailyLimitFor("general", limits);
+    const limit = user ? dailyLimitFor(user.accountType, limits) : dailyLimitFor("guest", limits, 1);
     const used = await repo.countTripsSince(key, dayAgo());
     const rate = evaluateRateLimit(used, limit);
     if (!rate.allowed) {
       const who = user ? `Your ${user.accountType} account allows` : "Guests can create";
-      return reply.code(429).send({ error: "daily trip limit reached", ...rate, message: `${who} ${limit} itineraries per 24 hours.${user ? "" : " Log in for your own allowance."}` });
+      const nudge = user ? "" : " Log in to plan up to 5 per day and save them.";
+      return reply.code(429).send({ error: "daily trip limit reached", ...rate, message: `${who} ${limit} itinerar${limit === 1 ? "y" : "ies"} per 24 hours.${nudge}` });
     }
 
     const trip = await generateItinerary(req.body as TripPreferences);
     trip.userId = key; // real user id, or guest:<ip>
     await repo.save(trip);
     return { ...trip, _rate: evaluateRateLimit(used + 1, limit), _guest: !user };
+  });
+
+  // List the signed-in user's saved itineraries (most recent first).
+  app.get("/itineraries", { preHandler: requireUser() }, async (req) => {
+    return repo.listByUser(userOf(req).id);
   });
 
   app.get("/itineraries/:id", { preHandler: requireUser() }, async (req, reply) => {

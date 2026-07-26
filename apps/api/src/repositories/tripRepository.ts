@@ -7,6 +7,7 @@ export interface TripRepository {
   save(trip: Trip): Promise<Trip>;
   get(id: string): Promise<Trip | undefined>;
   countTripsSince(userId: string, sinceIso: string): Promise<number>;
+  listByUser(userId: string): Promise<Trip[]>;
 }
 
 class InMemoryTripRepository implements TripRepository {
@@ -15,6 +16,9 @@ class InMemoryTripRepository implements TripRepository {
   async get(id: string) { return this.trips.get(id); }
   async countTripsSince(userId: string, sinceIso: string) {
     return [...this.trips.values()].filter((t) => t.userId === userId && t.createdAt >= sinceIso).length;
+  }
+  async listByUser(userId: string) {
+    return [...this.trips.values()].filter((t) => t.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 }
 
@@ -40,6 +44,10 @@ class PostgresTripRepository implements TripRepository {
       [userId, sinceIso],
     );
     return Number(r.rows[0]?.n ?? 0);
+  }
+  async listByUser(userId: string) {
+    const r = await this.db.query(`SELECT data FROM trips WHERE user_id = $1 ORDER BY created_at DESC`, [userId]);
+    return r.rows.map((x) => x.data as Trip);
   }
 }
 

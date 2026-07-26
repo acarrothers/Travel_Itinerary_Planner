@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
-import type { TripPreferences, BudgetBand } from "@trip-itinerary/core";
+import type { TripPreferences } from "@trip-itinerary/core";
 import type { OfferFinderResult } from "@trip-itinerary/api-client";
 import { api } from "../lib/api";
 import { describeApiError } from "../lib/apiError";
@@ -44,11 +44,14 @@ export default function Home() {
     finally { setLoading(false); }
   }
 
-  // "Plan Trip Itinerary" — hand the trip to the planner (guests welcome there too).
+  // "Plan Trip Itinerary" — build and show the detailed itinerary (guests welcome).
   function planTrip(p: TripPreferences) {
-    const style: Record<BudgetBand, string> = { budget: "budget", mid: "adventure", luxury: "luxury" };
-    const q = new URLSearchParams({ intent: "planner", dest: p.destinations[0] ?? "", party: p.party, style: style[p.budget] });
-    router.push(`/plan?${q.toString()}`);
+    const q = new URLSearchParams({
+      dest: p.destinations[0] ?? "", nights: String(p.nights), party: p.party,
+      budget: p.budget, pace: p.pace, interests: p.interests.join(","),
+      adults: String(p.adults), children: String(p.children),
+    });
+    router.push(`/itinerary?${q.toString()}`);
   }
 
   return (

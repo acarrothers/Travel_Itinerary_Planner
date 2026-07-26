@@ -78,7 +78,8 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     // destinations
     suggestDestinations: (q: string) => req<string[]>(`/destinations/suggest?q=${encodeURIComponent(q)}`),
     // itinerary (auth required server-side)
-    createItinerary: (prefs: TripPreferences) => req<Trip & { _rate?: RateLimitStatus }>("/itineraries", { method: "POST", body: JSON.stringify(prefs) }),
+    createItinerary: (prefs: TripPreferences) => req<Trip & { _rate?: RateLimitStatus; _guest?: boolean }>("/itineraries", { method: "POST", body: JSON.stringify(prefs) }),
+    listItineraries: () => req<Trip[]>("/itineraries"),
     getItinerary: (id: string) => req<Trip>(`/itineraries/${id}`),
     editItinerary: (id: string, instruction: string) => req<Trip>(`/itineraries/${id}/edit`, { method: "POST", body: JSON.stringify({ instruction }) }),
     reorderItem: (id: string, mv: ReorderInput) => req<Trip>(`/itineraries/${id}/reorder`, { method: "POST", body: JSON.stringify(mv) }),
