@@ -8,6 +8,7 @@ export interface TripRepository {
   get(id: string): Promise<Trip | undefined>;
   countTripsSince(userId: string, sinceIso: string): Promise<number>;
   listByUser(userId: string): Promise<Trip[]>;
+  delete(id: string): Promise<void>;
 }
 
 class InMemoryTripRepository implements TripRepository {
@@ -20,6 +21,7 @@ class InMemoryTripRepository implements TripRepository {
   async listByUser(userId: string) {
     return [...this.trips.values()].filter((t) => t.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
+  async delete(id: string) { this.trips.delete(id); }
 }
 
 // Stores the trip as JSONB; user_id + created_at columns power ownership + rate limits.
@@ -49,6 +51,7 @@ class PostgresTripRepository implements TripRepository {
     const r = await this.db.query(`SELECT data FROM trips WHERE user_id = $1 ORDER BY created_at DESC`, [userId]);
     return r.rows.map((x) => x.data as Trip);
   }
+  async delete(id: string) { await this.db.query(`DELETE FROM trips WHERE id = $1`, [id]); }
 }
 
 let repo: TripRepository | null = null;

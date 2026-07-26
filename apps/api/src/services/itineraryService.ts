@@ -11,12 +11,28 @@ function genPrompt(prefs: TripPreferences, placeNames: string[]): string {
   const grounding = placeNames.length
     ? ` Prefer these real places where they fit: ${placeNames.slice(0, 20).join("; ")}.`
     : "";
+  const dayCount = Math.max(1, prefs.nights);
   return [
     `Create a ${prefs.nights}-night travel itinerary for ${prefs.destinations.join(", ")}.`,
+    `The "days" array MUST contain exactly ${dayCount} day objects — one per day — each with 3-5 items.`,
     `Party: ${prefs.party}; budget: ${prefs.budget}; pace: ${prefs.pace}; interests: ${prefs.interests.join(", ")}.`,
     grounding,
     `Respond with ONLY JSON of shape: {"days":[{"items":[{"type":"activity|meal","title":"...","time":"HH:MM","categoryTags":["..."]}]}]}.`,
   ].join(" ");
+}
+
+// Guarantee the trip has exactly `nights` days regardless of what the model
+// returned — models sometimes emit a single day. Extra days are trimmed; missing
+// days are filled from the deterministic generator, then day.order is renumbered.
+function enforceDayCount(trip: Trip, prefs: TripPreferences, pois: Parameters<typeof buildTrip>[1]): Trip {
+  const expected = Math.max(1, prefs.nights);
+  let days = trip.days.slice(0, expected);
+  if (days.length < expected) {
+    const filler = buildTrip(prefs, pois).days;
+    for (let i = days.length; i < expected; i++) days.push(filler[i] ?? filler[filler.length - 1]);
+  }
+  days = days.map((d, i) => ({ ...d, order: i + 1 }));
+  return { ...trip, days };
 }
 
 export async function generateItinerary(prefs: TripPreferences): Promise<Trip> {
@@ -27,7 +43,8 @@ export async function generateItinerary(prefs: TripPreferences): Promise<Trip> {
     const res = await router.run({ task: "itinerary_generate", prompt: genPrompt(prefs, pois.map((p) => p.name)) });
     trip = attachPoiCoords(parseItinerary(res.text, prefs), pois);
     if (!isValidTrip(trip) || trip.days.length === 0) throw new Error("invalid");
-    console.log(`[itinerary] generated via ${res.provider}/${res.model}`);
+    trip = enforceDayCount(trip, prefs, pois); // models sometimes return too few days
+    console.log(`[itinerary] generated via ${res.provider}/${res.model} (${trip.days.length} days)`);
   } catch {
     console.warn("[itinerary] model generation unavailable -> deterministic fallback");
     trip = buildTrip(prefs, pois);

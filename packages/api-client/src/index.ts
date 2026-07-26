@@ -81,6 +81,7 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     createItinerary: (prefs: TripPreferences) => req<Trip & { _rate?: RateLimitStatus; _guest?: boolean }>("/itineraries", { method: "POST", body: JSON.stringify(prefs) }),
     listItineraries: () => req<Trip[]>("/itineraries"),
     getItinerary: (id: string) => req<Trip>(`/itineraries/${id}`),
+    deleteItinerary: (id: string) => req<{ ok: boolean }>(`/itineraries/${id}`, { method: "DELETE" }),
     editItinerary: (id: string, instruction: string) => req<Trip>(`/itineraries/${id}/edit`, { method: "POST", body: JSON.stringify({ instruction }) }),
     reorderItem: (id: string, mv: ReorderInput) => req<Trip>(`/itineraries/${id}/reorder`, { method: "POST", body: JSON.stringify(mv) }),
     // offers

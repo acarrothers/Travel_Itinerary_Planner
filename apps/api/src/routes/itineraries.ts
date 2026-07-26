@@ -54,6 +54,15 @@ export async function itineraryRoutes(app: FastifyInstance) {
     return trip;
   });
 
+  app.delete("/itineraries/:id", { preHandler: requireUser() }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const trip = await repo.get(id);
+    if (!trip) return reply.code(404).send({ error: "not found" });
+    if (trip.userId !== userOf(req).id) return reply.code(403).send({ error: "forbidden" });
+    await repo.delete(id);
+    return { ok: true };
+  });
+
   app.post("/itineraries/:id/edit", { preHandler: requireUser() }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const { instruction } = (req.body ?? {}) as { instruction?: string };

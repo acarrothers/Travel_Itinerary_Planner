@@ -63,6 +63,16 @@ describe("accounts + rate limiting", () => {
     expect(mine[0].createdAt >= mine[1].createdAt).toBe(true);
   });
 
+  it("deletes a saved itinerary", async () => {
+    const trips = new InMemoryTripRepository();
+    const t = mkTrip("u1", now());
+    await trips.save(t);
+    expect(await trips.get(t.id)).toBeDefined();
+    await trips.delete(t.id);
+    expect(await trips.get(t.id)).toBeUndefined();
+    expect(await trips.listByUser("u1")).toHaveLength(0);
+  });
+
   it("stores + fetches a user by email (hash stays internal)", async () => {
     const users = new InMemoryUserRepository();
     const u = await users.createUser({ id: "u9", email: "A@B.com", accountType: "general", createdAt: now(), passwordHash: "hash", provider: "password", emailVerified: false });
