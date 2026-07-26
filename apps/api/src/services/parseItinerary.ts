@@ -16,6 +16,10 @@ export function parseItinerary(text: string, prefs: TripPreferences): Trip {
       type: TYPES.includes(it.type) ? it.type : "activity",
       title: String(it.title ?? "Untitled"),
       time: it.time ? String(it.time) : undefined,
+      description: it.description ? String(it.description) : undefined,
+      // Models return the tip under various keys; surface it as the item's AI insight.
+      notes: it.tip ? String(it.tip) : it.insight ? String(it.insight) : it.note ? String(it.note) : undefined,
+      location: it.location ? String(it.location) : undefined,
       categoryTags: Array.isArray(it.categoryTags) ? it.categoryTags.map(String) : [],
       costBand: prefs.budget,
     })),

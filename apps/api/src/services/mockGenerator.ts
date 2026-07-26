@@ -33,8 +33,8 @@ export function buildTrip(prefs: TripPreferences, pois: Poi[] = []): Trip {
 
   for (let d = 0; d < Math.max(1, prefs.nights); d++) {
     const meals: Item[] = [
-      { id: uid(), type: "meal", title: "Lunch — local favorite", time: "13:00", categoryTags: ["food"], costBand: prefs.budget },
-      { id: uid(), type: "meal", title: "Dinner — recommended spot", time: "19:30", categoryTags: ["food"], costBand: prefs.budget },
+      { id: uid(), type: "meal", title: "Lunch — local favorite", time: "13:00", description: `A relaxed midday meal near your morning stop in ${dest}.`, categoryTags: ["food"], costBand: prefs.budget },
+      { id: uid(), type: "meal", title: "Dinner — recommended spot", time: "19:30", description: `Round off the day with a ${prefs.budget}-friendly dinner.`, categoryTags: ["food"], costBand: prefs.budget },
     ];
     let morning: Item, afternoon: Item;
     if (pois.length) {
@@ -42,8 +42,8 @@ export function buildTrip(prefs: TripPreferences, pois: Poi[] = []): Trip {
       afternoon = poiItem(pois[pi++ % pois.length], "15:30", pick(interests, d + 1), prefs.budget);
     } else {
       const a = pick(interests, d), b = pick(interests, d + 1);
-      morning = { id: uid(), type: "activity", title: `${MORNING[a] ?? "Morning activity"} in ${dest}`, time: "09:30", categoryTags: [a], costBand: prefs.budget };
-      afternoon = { id: uid(), type: "activity", title: AFTERNOON[b] ?? "Afternoon activity", time: "15:30", categoryTags: [b], costBand: prefs.budget };
+      morning = { id: uid(), type: "activity", title: `${MORNING[a] ?? "Morning activity"} in ${dest}`, time: "09:30", description: `Start day ${d + 1} with a ${a} highlight.`, categoryTags: [a], costBand: prefs.budget };
+      afternoon = { id: uid(), type: "activity", title: AFTERNOON[b] ?? "Afternoon activity", time: "15:30", description: `An afternoon focused on ${b}.`, categoryTags: [b], costBand: prefs.budget };
     }
     days.push({ id: uid(), order: d + 1, items: [morning, meals[0], afternoon, meals[1]] });
   }

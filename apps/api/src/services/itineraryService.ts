@@ -13,11 +13,13 @@ function genPrompt(prefs: TripPreferences, placeNames: string[]): string {
     : "";
   const dayCount = Math.max(1, prefs.nights);
   return [
-    `Create a ${prefs.nights}-night travel itinerary for ${prefs.destinations.join(", ")}.`,
-    `The "days" array MUST contain exactly ${dayCount} day objects — one per day — each with 3-5 items.`,
+    `Create a detailed ${prefs.nights}-night travel itinerary for ${prefs.destinations.join(", ")}.`,
+    `The "days" array MUST contain exactly ${dayCount} day objects — one per day — each with 4-6 items covering morning, lunch, afternoon and dinner.`,
     `Party: ${prefs.party}; budget: ${prefs.budget}; pace: ${prefs.pace}; interests: ${prefs.interests.join(", ")}.`,
+    `Use specific, real, named places (e.g. actual restaurants, museums, neighbourhoods) — not generic labels like "local restaurant".`,
+    `For each item include: a specific "title", a "time" (HH:MM), a one-sentence "description", a short practical "tip", and "categoryTags".`,
     grounding,
-    `Respond with ONLY JSON of shape: {"days":[{"items":[{"type":"activity|meal","title":"...","time":"HH:MM","categoryTags":["..."]}]}]}.`,
+    `Respond with ONLY JSON of shape: {"days":[{"items":[{"type":"activity|meal","title":"...","time":"HH:MM","description":"...","tip":"...","categoryTags":["..."]}]}]}.`,
   ].join(" ");
 }
 
