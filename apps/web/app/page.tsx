@@ -55,11 +55,12 @@ export default function Home() {
           padding: "clamp(32px, 6vw, 72px) clamp(20px, 4vw, 48px)",
           background: `linear-gradient(135deg, ${tokens.color.light} 0%, ${tokens.color.partnerBg} 55%, ${tokens.color.surface} 100%)`,
         }}>
-          {/* Banff-style illustrated hero, low-opacity behind the content. */}
-          <img src="/hero-banff.svg" alt="" aria-hidden="true" style={{
+          {/* Banff hero photo (Moraine Lake) with a light scrim so text stays legible. */}
+          <img src="/hero-banff.jpg" alt="" aria-hidden="true" style={{
             position: "absolute", inset: 0, width: "100%", height: "100%",
-            objectFit: "cover", opacity: 0.35, pointerEvents: "none",
+            objectFit: "cover", opacity: 0.5, pointerEvents: "none",
           }} />
+          <div style={{ position: "absolute", inset: 0, background: "rgba(251,249,248,0.55)", pointerEvents: "none" }} />
           <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, letterSpacing: "0.05em", textTransform: "uppercase", color: tokens.color.primary, textAlign: "center", marginBottom: tokens.space.sm }}>
             AI Travel Offer Finder
