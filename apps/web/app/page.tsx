@@ -56,6 +56,12 @@ export default function Home() {
           padding: "clamp(32px, 6vw, 72px) clamp(20px, 4vw, 48px)",
           background: `linear-gradient(135deg, ${tokens.color.light} 0%, ${tokens.color.partnerBg} 55%, ${tokens.color.surface} 100%)`,
         }}>
+          {/* Banff-style illustrated hero, low-opacity behind the content. */}
+          <img src="/hero-banff.svg" alt="" aria-hidden="true" style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            objectFit: "cover", opacity: 0.35, pointerEvents: "none",
+          }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, letterSpacing: "0.05em", textTransform: "uppercase", color: tokens.color.primary, textAlign: "center", marginBottom: tokens.space.sm }}>
             AI Travel Offer Finder
           </div>
@@ -107,6 +113,7 @@ export default function Home() {
             <p style={{ color: tokens.color.muted, fontSize: tokens.font.small, marginTop: tokens.space.md, marginBottom: 0, textAlign: "center" }}>
               You'll sign in to continue — your trip details carry over.
             </p>
+          </div>
           </div>
         </div>
       </main>
