@@ -1,5 +1,6 @@
 "use client";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import type { Trip, Offer, TripPreferences, ReorderInput, User, RateLimitStatus, BudgetBand, PartyType } from "@trip-itinerary/core";
@@ -46,12 +47,14 @@ function PlanPageInner() {
   const [instruction, setInstruction] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>(params.get("intent") === "planner" ? "planner" : "finder");
+  const [checked, setChecked] = useState(false); // finished the guest-vs-member check
 
-  // Auth guard: the session lives in an httpOnly cookie; /auth/me confirms it.
+  // Guests are allowed here; /auth/me just tells us whether someone is signed in.
   useEffect(() => {
     api.me().then((m) => { setUser(m.user); setRate(m.rate); })
-      .catch(() => router.replace("/login"));
-  }, [router]);
+      .catch(() => { /* not signed in — continue as guest */ })
+      .finally(() => setChecked(true));
+  }, []);
 
   async function logout() { try { await api.logout(); } catch { /* ignore */ } router.replace("/login"); }
   async function refreshOffer(id: string) { setOffer(await api.matchOffer(id, "post_generation")); }
@@ -78,7 +81,7 @@ function PlanPageInner() {
   }
   async function reorder(mv: ReorderInput) { if (trip) setTrip(await api.reorderItem(trip.id, mv)); }
 
-  if (!user) return <main style={{ ...pageContainer, color: tokens.color.mid }}>Loading…</main>;
+  if (!checked) return <main style={{ ...pageContainer, color: tokens.color.mid }}>Loading…</main>;
 
   const remainingText = rate ? (rate.remaining < 0 ? "Unlimited" : `${rate.remaining} of ${rate.limit} left today`) : "";
   const outOfTrips = rate ? (rate.remaining === 0 && rate.limit >= 0) : false;
@@ -93,11 +96,15 @@ function PlanPageInner() {
 
   return (
     <main style={pageContainer}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tokens.space.md }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: tokens.space.md, gap: 12, flexWrap: "wrap" }}>
         <div style={{ fontSize: 13, color: tokens.color.mid }}>
-          {user.email} · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span>
+          {user
+            ? <>{user.email}{remainingText ? <> · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span></> : null}</>
+            : <>Browsing as guest{remainingText ? <> · <span style={{ color: outOfTrips ? tokens.color.danger : tokens.color.navy }}>{remainingText}</span></> : null}</>}
         </div>
-        <button onClick={logout} style={{ background: "none", border: "1px solid #D5DEEC", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Log out</button>
+        {user
+          ? <button onClick={logout} style={{ background: "none", border: "1px solid #D5DEEC", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 13 }}>Log out</button>
+          : <Link href="/login" style={{ textDecoration: "none", fontFamily: tokens.font.heading, fontWeight: 700, background: tokens.color.accent, color: tokens.color.primaryDark, borderRadius: tokens.radius.lg, padding: "8px 16px", fontSize: 14 }}>Log in / Sign up</Link>}
       </div>
 
       <nav style={{ display: "flex", flexWrap: "wrap", borderBottom: `1px solid ${tokens.color.border}`, marginBottom: tokens.space.lg }}>
@@ -121,13 +128,21 @@ function PlanPageInner() {
       <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginTop: 0 }}>Plan a trip</h1>
       {outOfTrips && !trip && (
         <p style={{ color: tokens.color.warnText, background: tokens.color.warnBg, border: "1px solid #EBD9B4", padding: 12, borderRadius: 8 }}>
-          You've used your trip{rate && rate.limit === 1 ? "" : "s"} for today ({rate?.limit}/24h on the {user.accountType} plan). Try again tomorrow.
+          You've reached {rate?.limit} itineraries for today{user ? ` on the ${user.accountType} plan` : " (guest limit)"}. {user ? "Try again tomorrow." : <>Try again tomorrow, or <Link href="/login" style={{ color: tokens.color.primary }}>log in</Link> for your own allowance.</>}
         </p>
       )}
       <OnboardingForm onGenerate={generate} loading={loading} initial={initial} />
       {error && <p style={{ color: tokens.color.danger, marginTop: tokens.space.md }}>{error}</p>}
 
-      {trip && (
+      {/* Guests can plan but not save — nudge toward an account once they have a trip. */}
+      {trip && !user && (
+        <p style={{ marginTop: tokens.space.md, background: tokens.color.light, border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.md, padding: 12, color: tokens.color.primaryDark }}>
+          This itinerary won't be saved. <Link href="/login" style={{ color: tokens.color.primary, fontWeight: 700 }}>Log in or create an account</Link> to save it and refine it later.
+        </p>
+      )}
+
+      {/* Refine + reorder require an account (they persist changes). */}
+      {trip && user && (
         <div style={{ marginTop: tokens.space.lg, display: "flex", gap: 8 }}>
           <input value={instruction} onChange={(e) => setInstruction(e.target.value)}
             placeholder='Refine, e.g. "make day 2 more relaxed"'
@@ -140,7 +155,7 @@ function PlanPageInner() {
         </div>
       )}
 
-      {trip && <ItineraryView trip={trip} onReorder={reorder} />}
+      {trip && <ItineraryView trip={trip} onReorder={user ? reorder : () => {}} />}
       {trip && <MapView trip={trip} />}
       {trip && offer && <OfferCard offer={offer} clickUrl={api.trackOfferClickUrl(offer.id, trip.id)} />}
       </>

@@ -19,7 +19,7 @@ export interface RateLimitStatus {
 
 // Resolve the daily trip limit for an account type from a configurable map.
 // Falls back to the "general" baseline when the type is unknown.
-export function dailyLimitFor(accountType: AccountType, limits: Record<string, number>, fallback = 1): number {
+export function dailyLimitFor(accountType: AccountType, limits: Record<string, number>, fallback = 5): number {
   const v = limits[accountType];
   return typeof v === "number" ? v : (typeof limits.general === "number" ? limits.general : fallback);
 }

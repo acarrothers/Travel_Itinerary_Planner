@@ -3,9 +3,12 @@ import { matchOffers, extractSignals, summarizeOfferEvents, type OfferEvent } fr
 import { getTripRepository } from "../repositories/tripRepository.js";
 import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
-import { requireUser, userOf } from "../userAuth.js";
+import { optionalUser, maybeUserOf, clientIp } from "../userAuth.js";
 import { findOffersForTrip } from "../services/offerFinder.js";
 import type { TripPreferences } from "@trip-itinerary/core";
+
+// The rate-limit / ownership key: a member's id, or guest:<ip> for anonymous use.
+const ownerKey = (req: any) => { const u = maybeUserOf(req); return u ? u.id : `guest:${clientIp(req)}`; };
 
 declare const process: { env: Record<string, string | undefined> };
 const trips = getTripRepository();
@@ -20,7 +23,7 @@ const findLimit = { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } }
 
 export async function offerRoutes(app: FastifyInstance) {
   // AI offer finder: destination + preferences in, offers grouped by inferred need out.
-  app.post("/offers/find", { preHandler: requireUser(), ...findLimit }, async (req, reply) => {
+  app.post("/offers/find", { preHandler: optionalUser(), ...findLimit }, async (req, reply) => {
     const prefs = req.body as TripPreferences;
     if (!prefs?.destinations?.length) {
       return reply.code(400).send({ error: "destinations required" });
@@ -43,10 +46,10 @@ export async function offerRoutes(app: FastifyInstance) {
     return result;
   });
 
-  app.get("/offers/match", { preHandler: requireUser() }, async (req) => {
+  app.get("/offers/match", { preHandler: optionalUser() }, async (req) => {
     const { tripId, surface } = req.query as { tripId?: string; surface?: string };
     const trip = tripId ? await trips.get(tripId) : undefined;
-    if (!trip || trip.userId !== userOf(req).id) return null;
+    if (!trip || trip.userId !== ownerKey(req)) return null;
     const [best] = matchOffers(extractSignals(trip), await offers.listLiveOffers());
     if (best) void events.log({ id: uid(), offerId: best.id, partnerId: best.partnerId, tripId, type: "impression", surface: surface as any, timestamp: now() });
     return best ?? null;
@@ -75,7 +78,8 @@ export async function offerRoutes(app: FastifyInstance) {
 
   // Partner offer directory: every live offer, browsable by a signed-in user.
   // Read-only and non-targeted — this is the catalog, not the itinerary match.
-  app.get("/offers/directory", { preHandler: requireUser() }, async () => {
+  // Public: guests can browse the live partner catalog without an account.
+  app.get("/offers/directory", async () => {
     const [live, partners] = await Promise.all([offers.listLiveOffers(), offers.listPartners()]);
     const nameById = new Map(partners.map((p) => [p.id, p.name]));
     return live

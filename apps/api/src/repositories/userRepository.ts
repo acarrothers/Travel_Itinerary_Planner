@@ -9,7 +9,8 @@ export interface StoredUser extends User {
   emailVerified: boolean;
 }
 
-export const DEFAULT_ACCOUNT_LIMITS: Record<string, number> = { general: 1, pro: 25, unlimited: -1 };
+export const DEFAULT_ACCOUNT_LIMITS: Record<string, number> = { general: 5, pro: 25, unlimited: -1 };
+const LEGACY_GENERAL_LIMIT = 1; // baseline before guests + 5/24h; migrated forward on boot
 const uid = () => Math.random().toString(36).slice(2, 14);
 
 export interface UserRepository {
@@ -85,6 +86,9 @@ export async function seedAccountLimits(repo: UserRepository): Promise<void> {
   for (const [t, n] of Object.entries(DEFAULT_ACCOUNT_LIMITS)) {
     if (!(t in cur)) await repo.setAccountLimit(t, n);
   }
+  // One-time migration: bump the old general=1 baseline to the new 5/24h default.
+  // (Skips DBs where an admin has set a different, intentional value.)
+  if (cur.general === LEGACY_GENERAL_LIMIT) await repo.setAccountLimit("general", DEFAULT_ACCOUNT_LIMITS.general);
 }
 
 let repo: UserRepository | null = null;

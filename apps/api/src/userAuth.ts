@@ -45,4 +45,24 @@ export function requireUser() {
 }
 
 export const userOf = (req: FastifyRequest): AuthedUser => (req as any).user;
+
+// Fastify preHandler: attach req.user IF a valid token is present, but never 401.
+// Used by guest-accessible routes (directory, itinerary generation, finder).
+export function optionalUser() {
+  return async (req: FastifyRequest) => {
+    const cookieToken = (req as any).cookies?.tip_token as string | undefined;
+    const token = cookieToken ?? (req.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+    const user = token ? verifyToken(token) : null;
+    if (user) (req as any).user = user;
+  };
+}
+export const maybeUserOf = (req: FastifyRequest): AuthedUser | undefined => (req as any).user;
+
+// Best-effort client IP for anonymous rate limiting (behind Railway's proxy the
+// real client is the first X-Forwarded-For hop).
+export function clientIp(req: FastifyRequest): string {
+  const xff = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim();
+  return xff || req.ip || "unknown";
+}
+
 export const isValidEmail = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);

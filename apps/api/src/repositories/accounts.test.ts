@@ -13,25 +13,34 @@ const mkTrip = (userId: string, createdAt: string): Trip => ({
 });
 
 describe("accounts + rate limiting", () => {
-  it("seeds configurable limits with general = 1", async () => {
+  it("seeds configurable limits with general = 5", async () => {
     const users = new InMemoryUserRepository();
     await seedAccountLimits(users);
     const limits = await users.getAccountLimits();
-    expect(dailyLimitFor("general", limits)).toBe(1);
+    expect(dailyLimitFor("general", limits)).toBe(5);
   });
 
-  it("blocks a general user's 2nd trip within 24h, counts only the window", async () => {
+  it("blocks the 6th trip within 24h, counts only the window", async () => {
     const users = new InMemoryUserRepository();
     await seedAccountLimits(users);
     const trips = new InMemoryTripRepository();
-    const limit = dailyLimitFor("general", await users.getAccountLimits());
+    const limit = dailyLimitFor("general", await users.getAccountLimits()); // 5
 
-    expect(evaluateRateLimit(await trips.countTripsSince("u1", dayAgo()), limit).allowed).toBe(true);
-    await trips.save(mkTrip("u1", now()));                                   // 1 in window
+    for (let i = 0; i < 5; i++) await trips.save(mkTrip("u1", now()));       // 5 in window
     await trips.save(mkTrip("u1", iso(Date.now() - 48 * 3600 * 1000)));      // outside window
     const used = await trips.countTripsSince("u1", dayAgo());
-    expect(used).toBe(1);
-    expect(evaluateRateLimit(used, limit).allowed).toBe(false);
+    expect(used).toBe(5);
+    expect(evaluateRateLimit(used, limit).allowed).toBe(false);             // 6th blocked
+    expect(evaluateRateLimit(4, limit).allowed).toBe(true);                 // 5th still allowed
+  });
+
+  it("keys guest counts separately (guest:<ip>)", async () => {
+    const trips = new InMemoryTripRepository();
+    await trips.save(mkTrip("guest:1.2.3.4", now()));
+    await trips.save(mkTrip("guest:1.2.3.4", now()));
+    await trips.save(mkTrip("guest:9.9.9.9", now()));
+    expect(await trips.countTripsSince("guest:1.2.3.4", dayAgo())).toBe(2);
+    expect(await trips.countTripsSince("guest:9.9.9.9", dayAgo())).toBe(1);
   });
 
   it("stores + fetches a user by email (hash stays internal)", async () => {

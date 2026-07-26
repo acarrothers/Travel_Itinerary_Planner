@@ -58,7 +58,7 @@ describe("Postgres repositories (real engine)", () => {
   it("users + configurable account limits + per-user trip count", async () => {
     const users = new PostgresUserRepository(db);
     await seedAccountLimits(users);
-    expect((await users.getAccountLimits()).general).toBe(1);
+    expect((await users.getAccountLimits()).general).toBe(5);
 
     await users.createUser({ id: "u-pg", email: "pg@test.com", accountType: "general", createdAt: new Date().toISOString(), passwordHash: "h", provider: "password", emailVerified: false });
     const back = await users.getByEmail("pg@test.com");
