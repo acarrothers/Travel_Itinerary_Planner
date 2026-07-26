@@ -86,6 +86,8 @@ export function createClient(baseUrl: string, opts: ClientOptions = {}) {
     reorderItem: (id: string, mv: ReorderInput) => req<Trip>(`/itineraries/${id}/reorder`, { method: "POST", body: JSON.stringify(mv) }),
     // offers
     matchOffer: (tripId: string, surface: string) => req<Offer | null>(`/offers/match?tripId=${tripId}&surface=${surface}`),
+    // Localized offers for a trip (partner APIs + catalog), for the itinerary page.
+    tripOffers: (tripId: string) => req<Offer[]>(`/offers/for-trip?tripId=${encodeURIComponent(tripId)}`),
     // Partner offer directory: live catalog browsable by any signed-in user.
     listOfferDirectory: () => req<DirectoryOffer[]>("/offers/directory"),
     // AI offer finder: preferences in, offers grouped by inferred need out.

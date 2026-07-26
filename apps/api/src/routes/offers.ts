@@ -5,6 +5,8 @@ import { getOfferRepository } from "../repositories/offerRepository.js";
 import { getOfferEventRepository } from "../repositories/offerEventRepository.js";
 import { optionalUser, maybeUserOf, clientIp } from "../userAuth.js";
 import { findOffersForTrip } from "../services/offerFinder.js";
+import { fetchPartnerOffers } from "../partners/registry.js";
+import { queryFromPrefs } from "../partners/types.js";
 import type { TripPreferences } from "@trip-itinerary/core";
 
 // The rate-limit / ownership key: a member's id, or guest:<ip> for anonymous use.
@@ -44,6 +46,24 @@ export async function offerRoutes(app: FastifyInstance) {
       }
     }
     return result;
+  });
+
+  // Localized offers for a trip: live partner-API results (where configured)
+  // merged with the CMS catalog, ranked together. Used by the itinerary page.
+  app.get("/offers/for-trip", { preHandler: optionalUser() }, async (req) => {
+    const { tripId } = req.query as { tripId?: string };
+    const trip = tripId ? await trips.get(tripId) : undefined;
+    if (!trip || trip.userId !== ownerKey(req)) return [];
+    const signals = extractSignals(trip);
+    const [catalog, partner] = await Promise.all([
+      offers.listLiveOffers(),
+      fetchPartnerOffers(queryFromPrefs(trip.preferences)).catch(() => []),
+    ]);
+    const ranked = matchOffers(signals, [...partner, ...catalog]).slice(0, 8);
+    for (const o of ranked) {
+      void events.log({ id: uid(), offerId: o.id, partnerId: o.partnerId, tripId, type: "impression", surface: "inline_day", timestamp: now() });
+    }
+    return ranked;
   });
 
   app.get("/offers/match", { preHandler: optionalUser() }, async (req) => {

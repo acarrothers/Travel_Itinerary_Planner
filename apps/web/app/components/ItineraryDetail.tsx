@@ -6,8 +6,9 @@ import { api } from "../../lib/api";
 import { MapView } from "./MapView";
 
 // Detailed itinerary in the "vertical layout" design: map on top, a selected-stop
-// detail card, then a day-by-day timeline with the targeted partner offer embedded.
-export function ItineraryDetail({ trip, offer }: { trip: Trip; offer: Offer | null }) {
+// detail card, then a day-by-day timeline with localized partner offers embedded
+// (one per day, drawn from partner APIs + the CMS catalog).
+export function ItineraryDetail({ trip, offers }: { trip: Trip; offers: Offer[] }) {
   const days = [...trip.days].sort((a, b) => a.order - b.order);
   const [openDay, setOpenDay] = useState(days[0]?.order ?? 1);
   const firstItem = days[0]?.items[0] ?? null;
@@ -86,20 +87,23 @@ export function ItineraryDetail({ trip, offer }: { trip: Trip; offer: Offer | nu
                       <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.ink }}>{it.title}</p>
                     </div>
                   ))}
-                  {/* Embedded targeted partner offer (design: inline PARTNER row). */}
-                  {offer && (
-                    <a href={api.trackOfferClickUrl(offer.id, trip.id)} target="_blank" rel="noopener noreferrer sponsored"
-                      onClick={(e) => e.stopPropagation()} style={{ textDecoration: "none" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.color.accent }} />
-                        <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, color: tokens.color.muted }}>Partner</span>
-                      </div>
-                      <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.primaryDark, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                        {offer.title}
-                        <span style={{ background: tokens.color.accent, color: tokens.color.primaryDark, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: tokens.radius.full }}>PARTNER</span>
-                      </p>
-                    </a>
-                  )}
+                  {/* Embedded localized partner offer for this day (design: inline PARTNER row). */}
+                  {offers.length > 0 && (() => {
+                    const dayOffer = offers[(day.order - 1) % offers.length];
+                    return (
+                      <a href={api.trackOfferClickUrl(dayOffer.id, trip.id)} target="_blank" rel="noopener noreferrer sponsored"
+                        onClick={(e) => e.stopPropagation()} style={{ textDecoration: "none" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.color.accent }} />
+                          <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, color: tokens.color.muted }}>Partner{dayOffer.subtitle ? ` · ${dayOffer.subtitle}` : ""}</span>
+                        </div>
+                        <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.primaryDark, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                          {dayOffer.title}
+                          <span style={{ background: tokens.color.accent, color: tokens.color.primaryDark, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: tokens.radius.full }}>PARTNER</span>
+                        </p>
+                      </a>
+                    );
+                  })()}
                 </div>
               ) : (
                 <p style={{ color: tokens.color.muted, fontSize: tokens.font.small, margin: 0 }}>

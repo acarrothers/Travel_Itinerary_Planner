@@ -11,6 +11,7 @@ import { destinationRoutes } from "./routes/destinations.js";
 import { getOfferRepository, seedIfEmpty } from "./repositories/offerRepository.js";
 import { getUserRepository, seedAccountLimits } from "./repositories/userRepository.js";
 import { availableProviders } from "./aiSetup.js";
+import { enabledPartnerIntegrations } from "./partners/registry.js";
 
 const app = Fastify({ logger: true });
 // Allow the web client origin(s); default open for local/demo. Set CORS_ORIGIN to lock down.
@@ -19,7 +20,7 @@ await app.register(cookie);
 await app.register(cors, { origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : true, credentials: true });
 // Abuse protection: global cap; auth routes set tighter per-route limits.
 await app.register(rateLimit, { max: 200, timeWindow: "1 minute" });
-app.get("/health", async () => ({ ok: true, service: "trip-itinerary-api", providers: availableProviders() }));
+app.get("/health", async () => ({ ok: true, service: "trip-itinerary-api", providers: availableProviders(), partnerApis: enabledPartnerIntegrations() }));
 app.register(itineraryRoutes);
 app.register(offerRoutes);
 app.register(adminRoutes);

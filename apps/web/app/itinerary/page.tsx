@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 import type { Trip, Offer, TripPreferences, PartyType, BudgetBand, Pace, User } from "@trip-itinerary/core";
+// (Offer[] localized offers now come from /offers/for-trip)
 import { api } from "../../lib/api";
 import { describeApiError } from "../../lib/apiError";
 import { pageContainer } from "../../lib/layout";
@@ -26,7 +27,7 @@ function prefsFromParams(p: URLSearchParams): TripPreferences {
 function ItineraryInner() {
   const params = useSearchParams();
   const [trip, setTrip] = useState<Trip | null>(null);
-  const [offer, setOffer] = useState<Offer | null>(null);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [limited, setLimited] = useState<string | null>(null);
@@ -50,7 +51,7 @@ function ItineraryInner() {
           t = res;
         }
         setTrip(t);
-        try { setOffer(await api.matchOffer(t.id, "post_generation")); } catch { /* offers optional */ }
+        try { setOffers(await api.tripOffers(t.id)); } catch { /* offers optional */ }
       } catch (e: any) {
         if (e?.status === 429) setLimited(e?.body?.message || "You've reached your itinerary limit for today.");
         else setError(describeApiError(e));
@@ -91,7 +92,7 @@ function ItineraryInner() {
               ? <p style={{ background: "#E4F1F2", border: `1px solid ${tokens.color.teal}`, color: tokens.color.teal, borderRadius: tokens.radius.md, padding: "8px 12px", fontSize: tokens.font.small }}>✓ Saved to your account — find it under <Link href="/trips" style={{ color: tokens.color.teal, fontWeight: 700 }}>My Trips</Link>.</p>
               : <p style={{ background: tokens.color.light, border: `1px solid ${tokens.color.border}`, color: tokens.color.primaryDark, borderRadius: tokens.radius.md, padding: "8px 12px", fontSize: tokens.font.small }}>This itinerary won't be saved. <Link href="/login" style={{ color: tokens.color.primary, fontWeight: 700 }}>Log in or sign up</Link> to save it and edit it later.</p>}
             <div style={{ marginTop: tokens.space.md }}>
-              <ItineraryDetail trip={trip} offer={offer} />
+              <ItineraryDetail trip={trip} offers={offers} />
             </div>
           </>
         )}
