@@ -17,7 +17,7 @@ export interface OnboardingInitial {
 
 export function OnboardingForm({
   onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Generating…", initial,
-  secondaryLabel, onSecondary,
+  secondaryLabel, onSecondary, maxWidth = 560,
 }: {
   onGenerate: (p: TripPreferences) => void;
   loading: boolean;
@@ -26,6 +26,7 @@ export function OnboardingForm({
   initial?: OnboardingInitial; // prefill, e.g. from the landing-page handoff
   secondaryLabel?: string;               // optional 2nd action using the same fields
   onSecondary?: (p: TripPreferences) => void;
+  maxWidth?: number | string;            // form width; defaults to 560
 }) {
   const [destination, setDestination] = useState(initial?.destination || "Lisbon, Portugal");
   const [nights, setNights] = useState(4);
@@ -88,7 +89,7 @@ export function OnboardingForm({
   const input: React.CSSProperties = { padding: "8px 10px", border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.sm, fontSize: 15 };
 
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: tokens.space.md, gridTemplateColumns: "1fr 1fr", maxWidth: 560 }}>
+    <form onSubmit={submit} style={{ display: "grid", gap: tokens.space.md, gridTemplateColumns: "1fr 1fr", maxWidth }}>
       <div style={{ ...field, gridColumn: "1 / 3" }} ref={boxRef}>
         <label htmlFor="destination">Destination</label>
         <div style={{ position: "relative" }}>
