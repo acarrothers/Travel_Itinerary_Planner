@@ -30,6 +30,14 @@ Verify variable names exactly as written; they are read literally from the code.
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | respective keys | Optional extra AI providers if you want them in the routing pool. | Optional |
 | `GOOGLE_CLIENT_ID` | your Google OAuth client ID | Server-side verification of Google sign-in tokens. Must match the web value below. | If using Google SSO |
 | `APPLE_CLIENT_ID` | your Apple service ID | Server-side verification of Apple sign-in tokens. | If using Apple SSO |
+| `VIATOR_API_KEY` | Viator Partner API key | Live Viator experiences in itineraries. Off = catalog fallback. See `docs/PARTNER_API_INTEGRATION.md`. | Partner APIs |
+| `GETYOURGUIDE_API_KEY` | GetYourGuide access token | Live GetYourGuide tours in itineraries. | Partner APIs |
+| `GADVENTURES_API_KEY` | G Adventures Application Key | Live G Adventures tours. | Partner APIs |
+| `EXPEDIA_API_KEY` | Expedia Rapid API key | Live Expedia stays (Rapid needs signed requests — see docs). | Partner APIs |
+
+**Rate limits (optional overrides via CMS/DB):** guests get **1 itinerary/24h**, members **5/24h**. These live in the `account_limits` table (`guest`, `general`, `pro`, `unlimited`) and are seeded automatically; adjust per account type as needed.
+
+**Partner API status:** `GET /health` returns `partnerApis: [...]` listing which partner integrations are currently live.
 
 ---
 
