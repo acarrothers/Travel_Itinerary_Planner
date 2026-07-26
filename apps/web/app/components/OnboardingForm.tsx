@@ -143,8 +143,9 @@ export function OnboardingForm({
         </div>
       </div>
       <button type="submit" disabled={loading}
-        style={{ gridColumn: "1 / 3", background: tokens.color.accent, color: tokens.color.ink, border: "none",
-          padding: "12px 20px", borderRadius: tokens.radius.md, fontWeight: 600, fontSize: 15, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
+        style={{ gridColumn: "1 / 3", background: tokens.color.accent, color: tokens.color.primaryDark, border: "none",
+          padding: "12px 20px", borderRadius: tokens.radius.lg, fontFamily: tokens.font.heading, fontWeight: 700,
+          fontSize: tokens.font.body, cursor: "pointer", opacity: loading ? 0.6 : 1 }}>
         {loading ? loadingLabel : submitLabel}
       </button>
     </form>

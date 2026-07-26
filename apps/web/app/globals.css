@@ -1,16 +1,37 @@
-/* Global responsive baseline shared by every page. */
+/* Vibrant Voyager design system — global baseline shared by every page. */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  /* Warm near-white app background (VV `background`). */
+  background: #FBF9F8;
+  color: #1B1C1C;
+  font-family: Inter, system-ui, sans-serif;
   /* Never let a wide element force horizontal scrolling on small screens. */
   overflow-x: hidden;
 }
 
-/* Media should scale down inside its container rather than overflow. */
+/* Headlines use Hanken Grotesk; body copy stays Inter. Heading elements pick
+   this up automatically, so inline-styled headings inherit the right face. */
+h1, h2, h3, h4 { font-family: 'Hanken Grotesk', Inter, system-ui, sans-serif; }
+
+/* Media scales down inside its container rather than overflowing. */
 img, video, canvas, svg { max-width: 100%; height: auto; }
 
 /* Inputs/buttons inherit the page font instead of the UA default. */
 input, button, select, textarea { font-family: inherit; }
+
+/* Understated border that becomes a 2px purple border on focus (VV inputs). */
+input, select, textarea {
+  border-color: #CCC3D2;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #4B2882 !important;
+  box-shadow: 0 0 0 1px #4B2882;
+}

@@ -4,6 +4,7 @@ import { tokens } from "@trip-itinerary/ui";
 import type { DirectoryOffer } from "@trip-itinerary/api-client";
 import { api } from "../../lib/api";
 import { describeApiError } from "../../lib/apiError";
+import { PartnerOfferCard } from "./PartnerOfferCard";
 
 // Browse the live partner catalog. Read-only; clicking an offer goes through the
 // tracked affiliate redirect just like an itinerary-matched card.
@@ -62,18 +63,8 @@ export function OfferDirectory() {
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: tokens.space.md }}>
             {list.map((o) => (
-              <article key={o.id} style={{ border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.md, padding: tokens.space.md, display: "flex", flexDirection: "column", background: "#fff" }}>
-                {o.subtitle && (
-                  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 1, color: tokens.color.mid }}>{o.subtitle}</div>
-                )}
-                <div style={{ fontWeight: 700, color: tokens.color.navy, marginTop: 4 }}>{o.title}</div>
-                {o.body && <div style={{ color: tokens.color.mid, fontSize: 14, marginTop: 4, flex: 1 }}>{o.body}</div>}
-                <a href={api.directoryClickUrl(o.id)} target="_blank" rel="noopener noreferrer"
-                  style={{ alignSelf: "flex-start", marginTop: tokens.space.md, background: tokens.color.accent, color: tokens.color.ink,
-                    padding: "8px 16px", borderRadius: tokens.radius.sm, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>
-                  {o.ctaLabel} →
-                </a>
-              </article>
+              <PartnerOfferCard key={o.id} title={o.title} subtitle={o.subtitle} body={o.body}
+                ctaLabel={o.ctaLabel} href={api.directoryClickUrl(o.id)} />
             ))}
           </div>
         </section>
