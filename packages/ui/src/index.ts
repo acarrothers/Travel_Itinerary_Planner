@@ -34,11 +34,25 @@ export const tokens = {
   },
   space: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, "2xl": 48 },
   radius: { sm: 8, md: 12, lg: 16, xl: 24, full: 9999 },
+  // Type scale mirrors Vibrant Voyager DESIGN.md named tokens:
+  //   display-lg 48 / display-lg-mobile 32 (Hanken 800)
+  //   headline-md 24 / headline-sm 20 (Hanken 700)
+  //   body-lg 18 / body-md 16 / body-sm 14 (Inter 400)
+  //   label-caps 12 (JetBrains Mono 600) · cta-text 16 (Hanken 700)
   font: {
-    family: "Inter, system-ui, sans-serif",              // body
-    heading: "'Hanken Grotesk', Inter, system-ui, sans-serif", // headlines
-    mono: "'JetBrains Mono', ui-monospace, monospace",   // metadata / timestamps
-    display: 40, h1: 32, h2: 24, h3: 20, body: 16, small: 14, caps: 12,
+    family: "Inter, system-ui, sans-serif",              // body (Inter)
+    heading: "'Hanken Grotesk', Inter, system-ui, sans-serif", // headlines (Hanken Grotesk)
+    mono: "'JetBrains Mono', ui-monospace, monospace",   // metadata / label-caps (JetBrains Mono)
+    display: 48,        // display-lg
+    displayMobile: 32,  // display-lg-mobile
+    h1: 32,             // display-lg-mobile (page titles)
+    h2: 24,             // headline-md
+    h3: 20,             // headline-sm
+    bodyLg: 18,         // body-lg
+    body: 16,           // body-md
+    small: 14,          // body-sm
+    caps: 12,           // label-caps
+    cta: 16,            // cta-text
   },
 } as const;
 export type Tokens = typeof tokens;
