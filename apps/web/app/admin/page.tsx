@@ -1,160 +1,101 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@trip-itinerary/api-client";
 import { tokens } from "@trip-itinerary/ui";
-import { OPS_BY_DIMENSION, TARGETING_DIMENSIONS, isListOp, emptyTargetingRule, describeRule } from "@trip-itinerary/core";
-import type { Offer, TargetingRule } from "@trip-itinerary/core";
 import { AdminGuard } from "../components/AdminGuard";
+import { AdminNav } from "../components/AdminNav";
 import { describeApiError } from "../../lib/apiError";
 import { pageContainer } from "../../lib/layout";
-import { AdminNav } from "../components/AdminNav";
 
 declare const process: { env: Record<string, string | undefined> };
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
-const blank: Omit<Offer, "targeting"> = {
-  id: "", partnerId: "viator", title: "", subtitle: "", body: "",
-  ctaLabel: "See experiences", destinationUrl: "https://www.viator.com/",
-  category: "tours", tags: [], priority: 50, surfaces: ["post_generation"], status: "draft",
-};
-
-function AdminPageInner() {
+// Admin landing: at-a-glance stats + quick links into each management surface.
+function DashboardInner() {
   const [token, setToken] = useState("");
   const client = useMemo(() => createClient(BASE, { authToken: token || undefined }), [token]);
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [form, setForm] = useState<Omit<Offer, "targeting">>(blank);
-  const [rules, setRules] = useState<TargetingRule[]>([{ dimension: "interests", op: "contains_any", value: ["culture", "food"] }]);
-  const [me, setMe] = useState<{ role: string; can: Record<string, boolean> } | null>(null);
+  const [stats, setStats] = useState<{ offers: number; live: number; partners: number; pending: number; ctr: number | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
     setError(null);
-    // Load independently: a failure fetching the role shouldn't blank the catalog.
     try {
-      setOffers(await client.adminListOffers());
-    } catch (e: any) {
-      setError(describeApiError(e));
-      return;
-    }
-    try {
-      setMe(await client.adminMe());
-    } catch (e: any) {
-      setError(`Loaded offers, but couldn't read your role: ${describeApiError(e)}`);
-    }
+      const [offers, summary] = await Promise.all([client.adminListOffers(), client.adminPartnerSummary()]);
+      let ctr: number | null = null;
+      try {
+        const rows = await client.adminReport();
+        const imp = rows.reduce((a, r) => a + r.impressions, 0);
+        const clk = rows.reduce((a, r) => a + r.clicks, 0);
+        ctr = imp ? clk / imp : 0;
+      } catch { /* metrics optional */ }
+      setStats({
+        offers: offers.length,
+        live: offers.filter((o) => o.status === "live").length,
+        partners: summary.stats.totalPartners,
+        pending: summary.stats.pendingApprovals,
+        ctr,
+      });
+    } catch (e: any) { setError(describeApiError(e)); }
   }
   useEffect(() => { load(); }, [token]);
 
-  function setRule(i: number, patch: Partial<TargetingRule>) {
-    setRules((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
-  }
-  function parseValue(op: TargetingRule["op"], raw: string): TargetingRule["value"] {
-    if (isListOp(op)) return raw.split(",").map((s) => s.trim()).filter(Boolean);
-    if (op === "gte" || op === "lte") return Number(raw) || 0;
-    return raw;
-  }
+  const statCard = (icon: string, label: string, value: string, caption?: string, captionColor = tokens.color.muted) => (
+    <div style={{ flex: "1 1 200px", background: tokens.color.bg, border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.lg, padding: tokens.space.md }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 18, width: 34, height: 34, display: "inline-flex", alignItems: "center", justifyContent: "center", background: tokens.color.light, borderRadius: tokens.radius.md }}>{icon}</span>
+        <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, letterSpacing: "0.05em", textTransform: "uppercase", color: tokens.color.muted }}>{label}</span>
+      </div>
+      <div style={{ fontFamily: tokens.font.heading, fontSize: tokens.font.display, fontWeight: 800, color: tokens.color.primaryDark, lineHeight: 1.1, marginTop: 6 }}>{value}</div>
+      {caption && <div style={{ fontSize: 13, color: captionColor, marginTop: 2 }}>{caption}</div>}
+    </div>
+  );
 
-  async function save() {
-    const cleanRules = rules.filter((r) => (Array.isArray(r.value) ? r.value.length : r.value !== ""));
-    const offer: Offer = {
-      ...form,
-      id: form.id || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40) || `offer-${Date.now()}`,
-      tags: cleanRules.flatMap((r) => (Array.isArray(r.value) ? (r.value as string[]) : [])),
-      targeting: cleanRules,
-    };
-    try {
-      await client.adminSaveOffer(offer);
-      setForm(blank); setRules([emptyTargetingRule()]); load();
-    } catch (e: any) {
-      setError(`Save failed: ${describeApiError(e)}`);
-    }
-  }
-  function edit(o: Offer) { const { targeting, ...rest } = o; setForm(rest); setRules(targeting.length ? targeting : [emptyTargetingRule()]); }
-  async function remove(id: string) { try { await client.adminDeleteOffer(id); load(); } catch (e: any) { setError(`Delete failed: ${describeApiError(e)}`); } }
-
-  const input: React.CSSProperties = { padding: "8px 10px", border: "1px solid #D5DEEC", borderRadius: 6, fontSize: 14, width: "100%", boxSizing: "border-box" };
-  const label: React.CSSProperties = { fontSize: 13, color: tokens.color.mid, display: "block", marginBottom: 4 };
+  const linkCard = (href: string, icon: string, title: string, desc: string) => (
+    <Link href={href} style={{ textDecoration: "none", flex: "1 1 240px", background: tokens.color.bg, border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.lg, padding: tokens.space.md }}>
+      <div style={{ fontSize: 22 }}>{icon}</div>
+      <div style={{ fontFamily: tokens.font.heading, fontWeight: 700, fontSize: tokens.font.h3, color: tokens.color.primaryDark, marginTop: 6 }}>{title}</div>
+      <div style={{ color: tokens.color.muted, fontSize: tokens.font.small, marginTop: 2 }}>{desc}</div>
+      <div style={{ color: tokens.color.primary, fontFamily: tokens.font.heading, fontWeight: 700, fontSize: 14, marginTop: tokens.space.sm }}>Open →</div>
+    </Link>
+  );
 
   return (
     <main style={pageContainer}>
       <AdminNav />
-      <h1 style={{ color: tokens.color.navy, fontSize: tokens.font.h1, marginBottom: 4 }}>Offers CMS</h1>
-      <p style={{ color: tokens.color.mid, marginTop: 0 }}>Manage the partner catalog and targeting — no code changes needed.</p>
-
-      <div style={{ display: "flex", gap: 8, alignItems: "center", margin: `${tokens.space.md}px 0` }}>
-        <input style={{ ...input, maxWidth: 300 }} placeholder="API key (blank = dev mode)" value={token} onChange={(e) => setToken(e.target.value)} />
-        <span style={{ fontSize: 13, color: tokens.color.mid }}>{me ? `Role: ${me.role}` : ""}</span>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <h1 style={{ color: tokens.color.primaryDark, fontSize: tokens.font.h1, margin: 0 }}>Admin Dashboard</h1>
+          <p style={{ color: tokens.color.muted, marginTop: 4 }}>Offers, partners, and performance at a glance.</p>
+        </div>
+        <input style={{ padding: "8px 10px", border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.sm, fontSize: 14, width: 220, boxSizing: "border-box" }}
+          placeholder="API key (blank = dev)" value={token} onChange={(e) => setToken(e.target.value)} />
       </div>
       {error && <p style={{ color: tokens.color.danger }}>{error}</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, padding: tokens.space.md, border: "1px solid #E2E8F2", borderRadius: tokens.radius.md }}>
-        <div style={{ gridColumn: "1 / 3", fontWeight: 700, color: tokens.color.navy }}>{form.id ? `Edit: ${form.id}` : "New offer"}</div>
-        <div><label style={label}>Title</label><input style={input} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-        <div><label style={label}>Partner ID</label><input style={input} value={form.partnerId} onChange={(e) => setForm({ ...form, partnerId: e.target.value })} /></div>
-        <div><label style={label}>CTA label</label><input style={input} value={form.ctaLabel} onChange={(e) => setForm({ ...form, ctaLabel: e.target.value })} /></div>
-        <div><label style={label}>Destination URL</label><input style={input} value={form.destinationUrl} onChange={(e) => setForm({ ...form, destinationUrl: e.target.value })} /></div>
-        <div style={{ gridColumn: "1 / 3" }}><label style={label}>Body</label><input style={input} value={form.body ?? ""} onChange={(e) => setForm({ ...form, body: e.target.value })} /></div>
-        <div><label style={label}>Priority</label><input style={input} type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })} /></div>
-        <div><label style={label}>Status</label>
-          <select style={input} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Offer["status"] })}>
-            <option value="draft">draft</option><option value="live">live (needs publish role)</option><option value="paused">paused</option>
-          </select>
-        </div>
-
-        <div style={{ gridColumn: "1 / 3" }}>
-          <label style={label}>Targeting rules (all must match)</label>
-          {rules.map((r, i) => (
-            <div key={i} style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6, alignItems: "center" }}>
-              <select style={{ ...input, width: 130 }} value={r.dimension}
-                onChange={(e) => { const dim = e.target.value as TargetingRule["dimension"]; setRule(i, { dimension: dim, op: OPS_BY_DIMENSION[dim as keyof typeof OPS_BY_DIMENSION][0], value: isListOp(OPS_BY_DIMENSION[dim as keyof typeof OPS_BY_DIMENSION][0]) ? [] : "" }); }}>
-                {TARGETING_DIMENSIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
-              <select style={{ ...input, width: 130 }} value={r.op} onChange={(e) => setRule(i, { op: e.target.value as TargetingRule["op"] })}>
-                {(OPS_BY_DIMENSION[r.dimension as keyof typeof OPS_BY_DIMENSION] ?? ["is"]).map((op) => <option key={op} value={op}>{op}</option>)}
-              </select>
-              <input style={input} placeholder={isListOp(r.op) ? "comma,separated" : "value"}
-                value={Array.isArray(r.value) ? r.value.join(", ") : String(r.value ?? "")}
-                onChange={(e) => setRule(i, { value: parseValue(r.op, e.target.value) })} />
-              <button onClick={() => setRules((rs) => rs.filter((_, idx) => idx !== i))} style={{ cursor: "pointer", color: tokens.color.danger }}>✕</button>
-            </div>
-          ))}
-          <button onClick={() => setRules((rs) => [...rs, emptyTargetingRule()])} style={{ cursor: "pointer", fontSize: 13 }}>+ Add rule</button>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
-          <button onClick={save} style={{ background: tokens.color.blue, color: "#fff", border: "none", padding: "9px 18px", borderRadius: 6, fontWeight: 600, cursor: "pointer" }}>Save offer</button>
-          {form.id && <button onClick={() => { setForm(blank); setRules([emptyTargetingRule()]); }} style={{ background: "#fff", border: "1px solid #D5DEEC", padding: "9px 14px", borderRadius: 6, cursor: "pointer" }}>Cancel</button>}
-        </div>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: `${tokens.space.lg}px 0` }}>
+        {statCard("🏷️", "Total Offers", stats ? String(stats.offers) : "—", stats ? `${stats.live} live` : undefined)}
+        {statCard("🤝", "Partners", stats ? String(stats.partners) : "—")}
+        {statCard("⏳", "Pending Approvals", stats ? String(stats.pending) : "—",
+          stats && stats.pending > 0 ? "Requires attention" : "All clear",
+          stats && stats.pending > 0 ? tokens.color.warnText : tokens.color.teal)}
+        {statCard("📈", "Avg CTR", stats && stats.ctr !== null ? `${(stats.ctr * 100).toFixed(1)}%` : "—")}
       </div>
 
-      <div style={{ overflowX: "auto", marginTop: tokens.space.lg }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 560 }}>
-        <thead><tr style={{ background: tokens.color.navy, color: "#fff", textAlign: "left" }}>
-          <th style={{ padding: 8 }}>Title</th><th style={{ padding: 8 }}>Partner</th><th style={{ padding: 8 }}>Status</th><th style={{ padding: 8 }}>Targeting</th><th style={{ padding: 8 }}></th>
-        </tr></thead>
-        <tbody>
-          {offers.map((o, i) => (
-            <tr key={o.id} style={{ background: i % 2 ? tokens.color.surface : "#fff" }}>
-              <td style={{ padding: 8 }}>{o.title}</td>
-              <td style={{ padding: 8 }}>{o.partnerId}</td>
-              <td style={{ padding: 8, color: o.status === "live" ? tokens.color.blue : tokens.color.mid }}>{o.status}</td>
-              <td style={{ padding: 8, color: tokens.color.mid, fontSize: 12 }}>{o.targeting.map(describeRule).join(" · ") || "—"}</td>
-              <td style={{ padding: 8, textAlign: "right", whiteSpace: "nowrap" }}>
-                <button onClick={() => edit(o)} style={{ marginRight: 6, cursor: "pointer" }}>Edit</button>
-                <button onClick={() => remove(o.id)} style={{ color: tokens.color.danger, cursor: "pointer" }}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2 style={{ fontFamily: tokens.font.heading, fontWeight: 700, fontSize: tokens.font.h3, color: tokens.color.ink, marginBottom: tokens.space.sm }}>Manage</h2>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        {linkCard("/admin/offers", "🏷️", "Offers", "Create and target partner offers")}
+        {linkCard("/admin/partners", "🤝", "Partners", "Onboard partners; import from CSV")}
+        {linkCard("/admin/reports", "📊", "Reports", "Funnel per offer: clicks, conversions, revenue")}
       </div>
     </main>
   );
 }
 
-export default function AdminPage() {
+export default function AdminDashboardPage() {
   return (
     <AdminGuard>
-      <AdminPageInner />
+      <DashboardInner />
     </AdminGuard>
   );
 }

@@ -4,7 +4,8 @@ import { usePathname } from "next/navigation";
 import { tokens } from "@trip-itinerary/ui";
 
 const LINKS = [
-  { href: "/admin", label: "Offers" },
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/offers", label: "Offers" },
   { href: "/admin/partners", label: "Partners" },
   { href: "/admin/reports", label: "Reports" },
 ];
