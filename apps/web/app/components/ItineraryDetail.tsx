@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { tokens } from "@trip-itinerary/ui";
 import type { Trip, Offer, Item } from "@trip-itinerary/core";
+import { assignOffersToDays } from "@trip-itinerary/core";
 import { api } from "../../lib/api";
 import { MapView } from "./MapView";
 
@@ -10,6 +11,8 @@ import { MapView } from "./MapView";
 // (one per day, drawn from partner APIs + the CMS catalog).
 export function ItineraryDetail({ trip, offers }: { trip: Trip; offers: Offer[] }) {
   const days = [...trip.days].sort((a, b) => a.order - b.order);
+  // Distribute offers across days per the cadence rules (0, 1, or 2 per day).
+  const dayOffers = useMemo(() => assignOffersToDays(trip, offers), [trip, offers]);
   const [openDay, setOpenDay] = useState(days[0]?.order ?? 1);
   const firstItem = days[0]?.items[0] ?? null;
   const [selected, setSelected] = useState<Item | null>(firstItem);
@@ -87,27 +90,25 @@ export function ItineraryDetail({ trip, offers }: { trip: Trip; offers: Offer[] 
                       <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.ink }}>{it.title}</p>
                     </div>
                   ))}
-                  {/* Embedded localized partner offer for this day (design: inline PARTNER row). */}
-                  {offers.length > 0 && (() => {
-                    const dayOffer = offers[(day.order - 1) % offers.length];
-                    return (
-                      <a href={api.trackOfferClickUrl(dayOffer.id, trip.id)} target="_blank" rel="noopener noreferrer sponsored"
-                        onClick={(e) => e.stopPropagation()} style={{ textDecoration: "none" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.color.accent }} />
-                          <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, color: tokens.color.muted }}>Partner{dayOffer.subtitle ? ` · ${dayOffer.subtitle}` : ""}</span>
-                        </div>
-                        <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.primaryDark, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                          {dayOffer.title}
-                          <span style={{ background: tokens.color.accent, color: tokens.color.primaryDark, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: tokens.radius.full }}>PARTNER</span>
-                        </p>
-                      </a>
-                    );
-                  })()}
+                  {/* Localized partner offers assigned to this day by the cadence rules (0-2). */}
+                  {(dayOffers.get(day.order) ?? []).map((dayOffer) => (
+                    <a key={dayOffer.id} href={api.trackOfferClickUrl(dayOffer.id, trip.id)} target="_blank" rel="noopener noreferrer sponsored"
+                      onClick={(e) => e.stopPropagation()} style={{ textDecoration: "none" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.color.accent }} />
+                        <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.caps, color: tokens.color.muted }}>Partner{dayOffer.subtitle ? ` · ${dayOffer.subtitle}` : ""}</span>
+                      </div>
+                      <p style={{ margin: "2px 0 0 16px", fontWeight: 600, color: tokens.color.primaryDark, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        {dayOffer.title}
+                        <span style={{ background: tokens.color.accent, color: tokens.color.primaryDark, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: tokens.radius.full }}>PARTNER</span>
+                      </p>
+                    </a>
+                  ))}
                 </div>
               ) : (
                 <p style={{ color: tokens.color.muted, fontSize: tokens.font.small, margin: 0 }}>
-                  {day.items.length} stop{day.items.length === 1 ? "" : "s"} — tap to view.
+                  {day.items.length} stop{day.items.length === 1 ? "" : "s"}
+                  {(dayOffers.get(day.order)?.length ?? 0) > 0 ? ` · ${dayOffers.get(day.order)!.length} offer${dayOffers.get(day.order)!.length === 1 ? "" : "s"}` : ""} — tap to view.
                 </p>
               )}
             </div>

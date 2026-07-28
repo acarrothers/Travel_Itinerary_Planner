@@ -10,3 +10,4 @@ export * from "./accounts";
 export * from "./destinations";
 export * from "./needs";
 export * from "./partnerCsv";
+export * from "./offerCadence";
