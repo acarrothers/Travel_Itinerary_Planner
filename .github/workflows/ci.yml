@@ -19,7 +19,9 @@ jobs:
           cache: pnpm
       - name: Install
         run: pnpm install --no-frozen-lockfile
-      - name: Typecheck
+      - name: Typecheck (packages + web + api)
         run: pnpm typecheck
+      - name: Typecheck (mobile / React Native)
+        run: pnpm --filter @trip-itinerary/mobile typecheck
       - name: Test
         run: pnpm test
