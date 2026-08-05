@@ -30,9 +30,17 @@ EXPO_PUBLIC_API_BASE_URL=https://<your-api-domain>
 EXPO_PUBLIC_GOOGLE_CLIENT_ID=<google web client id>
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=<google iOS client id>       # native iOS
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=<google Android client id>
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=<google maps sdk key>        # native map
 ```
 Apple Sign In works on iOS only and requires the Apple Developer Program. Google
 Sign In needs OAuth client IDs from Google Cloud (iOS/Android for native builds).
+
+## Native map
+The itinerary map uses `react-native-maps` with the Google provider. `app.config.js`
+injects `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` into the iOS/Android native config at build
+time, so set it before `eas build`. Enable the **Maps SDK for Android** and **Maps SDK
+for iOS** on that key in Google Cloud. Without the module (e.g. Expo Go) or without
+coordinates, the map degrades to a stops list — no crash.
 
 ## Store submission (later)
 `eas build --profile production` then `eas submit -p ios` / `eas submit -p android`.

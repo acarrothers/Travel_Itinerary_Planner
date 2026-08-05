@@ -1,20 +1,54 @@
 import { View, Text, StyleSheet } from "react-native";
-import { tripMapPoints, type Trip } from "@trip-itinerary/core";
+import { tripMapPoints, type Trip, type MapPoint } from "@trip-itinerary/core";
 import { tokens } from "@trip-itinerary/ui";
 
-// Uses the SAME shared `tripMapPoints` helper as the web map, so both clients plot
-// identical points. This renders a lightweight stops preview that runs in Expo Go.
-//
-// To enable the full native Google map, install react-native-maps and use
-// provider={PROVIDER_GOOGLE} (a native module; create an Expo dev build), then
-// replace the list below with <MapView> + <Marker> per point. Configure the Google
-// Maps API key in app.json and EXPO_PUBLIC_GOOGLE_MAPS_API_KEY.
+declare const require: (m: string) => any;
+
+// Load react-native-maps only if the native module is present in this build.
+// Guarded so the app still runs in Expo Go / a build without the module — it
+// falls back to a lightweight stops list. The full Google map needs a dev build
+// plus EXPO_PUBLIC_GOOGLE_MAPS_API_KEY (see app.config.js).
+let RNMaps: any = null;
+try { RNMaps = require("react-native-maps"); } catch { RNMaps = null; }
+
+// Region that comfortably frames all stops (center + padded deltas).
+function regionFor(points: MapPoint[]) {
+  const lats = points.map((p) => p.lat);
+  const lngs = points.map((p) => p.lng);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  return {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: Math.max(0.05, (maxLat - minLat) * 1.5),
+    longitudeDelta: Math.max(0.05, (maxLng - minLng) * 1.5),
+  };
+}
+
 export function MapView({ trip }: { trip: Trip }) {
   const points = tripMapPoints(trip);
+
+  // Native Google map when the module is available and we have coordinates.
+  if (RNMaps && points.length > 0) {
+    const Map = RNMaps.default;
+    const Marker = RNMaps.Marker;
+    const PROVIDER_GOOGLE = RNMaps.PROVIDER_GOOGLE;
+    return (
+      <View style={styles.mapWrap}>
+        <Map provider={PROVIDER_GOOGLE} style={styles.map} initialRegion={regionFor(points)}>
+          {points.map((p) => (
+            <Marker key={p.id} coordinate={{ latitude: p.lat, longitude: p.lng }} title={p.title} description={`Day ${p.day}`} />
+          ))}
+        </Map>
+      </View>
+    );
+  }
+
+  // Fallback: no coordinates yet (Foursquare grounding off) or no native module.
   if (points.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Map appears once items have coordinates (Foursquare grounding).</Text>
+        <Text style={styles.emptyText}>Map appears once itinerary items have coordinates (Foursquare grounding).</Text>
       </View>
     );
   }
@@ -32,6 +66,8 @@ export function MapView({ trip }: { trip: Trip }) {
 }
 
 const styles = StyleSheet.create({
+  mapWrap: { marginTop: tokens.space.lg, height: 300, borderRadius: tokens.radius.lg, overflow: "hidden", borderWidth: 1, borderColor: tokens.color.border },
+  map: { flex: 1 },
   card: { marginTop: tokens.space.lg, borderWidth: 1, borderColor: tokens.color.border, borderRadius: tokens.radius.md, padding: tokens.space.md },
   title: { fontWeight: "700", color: tokens.color.navy, marginBottom: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 5 },
