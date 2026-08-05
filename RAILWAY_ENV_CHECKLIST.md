@@ -20,7 +20,7 @@ Verify variable names exactly as written; they are read literally from the code.
 | `DATABASE_URL` | the Postgres plugin's connection string | Persists users/offers/trips. Without it data is in-memory and resets on redeploy. | Required |
 | `GEMINI_API_KEY` | your Gemini key | Real AI itineraries. Until set, `/health` shows `providers:["stub"]` and generation uses the deterministic fallback. | High |
 | `XAI_API_KEY` | your Grok/xAI key | Second live AI provider for the orchestration layer. | High |
-| `FOURSQUARE_API_KEY` | your Foursquare key | Live global destination autocomplete + real map-pin coordinates (else curated fallback). | High |
+| `GOOGLE_PLACES_API_KEY` | a Google Cloud key with the **Places API** enabled | POI grounding + live destination autocomplete + real map-pin coordinates (else curated fallback). Falls back to `GOOGLE_MAPS_API_KEY` if unset. | High |
 | `CORS_ORIGIN` | `https://web-production-9a4fd.up.railway.app` | Locks API access to your web origin. Defaults to open if unset. | Recommended |
 | `APP_WEB_URL` | `https://web-production-9a4fd.up.railway.app` | Base for links in verification/reset emails. Defaults to localhost. | If using email |
 | `RESEND_API_KEY` | your Resend key | Sends real verification/reset emails (else they're logged, not delivered). | If using email |
@@ -58,7 +58,7 @@ Set these on **Web**, then **redeploy Web** (required — they're build-time).
 ## 3. Fastest path to a fully live site
 
 1. **API:** confirm `NODE_ENV`, `APP_API_KEYS`, `JWT_SECRET`, `DATABASE_URL` are set.
-2. **API:** add `GEMINI_API_KEY`, `XAI_API_KEY`, `FOURSQUARE_API_KEY` → redeploy.
+2. **API:** add `GEMINI_API_KEY`, `XAI_API_KEY`, `GOOGLE_PLACES_API_KEY` → redeploy.
 3. Check `https://travelitineraryplanner-production.up.railway.app/health` — you should
    see `gemini` and `grok` in `providers` (no longer just `stub`).
 4. **Web:** confirm `NEXT_PUBLIC_API_BASE_URL` points at the API; add

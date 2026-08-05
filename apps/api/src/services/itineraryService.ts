@@ -38,8 +38,8 @@ function enforceDayCount(trip: Trip, prefs: TripPreferences, pois: Parameters<ty
 }
 
 export async function generateItinerary(prefs: TripPreferences): Promise<Trip> {
-  const pois = await getPois(prefs).catch(() => []); // Foursquare grounding (best-effort)
-  console.log(`[poi] ${pois.length} Foursquare place(s) for ${prefs.destinations[0] ?? "?"}`);
+  const pois = await getPois(prefs).catch(() => []); // Google Places grounding (best-effort)
+  console.log(`[poi] ${pois.length} Google place(s) for ${prefs.destinations[0] ?? "?"}`);
   let trip: Trip;
   try {
     const res = await router.run({ task: "itinerary_generate", prompt: genPrompt(prefs, pois.map((p) => p.name)) });

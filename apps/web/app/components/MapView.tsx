@@ -27,7 +27,7 @@ function loadGoogleMaps(key: string): Promise<void> {
 }
 
 // Plots itinerary stops on a Google map. When stops have coordinates (via
-// Foursquare grounding) it drops a pin per stop; otherwise it still shows the
+// Google Places grounding) it drops a pin per stop; otherwise it still shows the
 // map centered on the destination by geocoding it, so the map is never blank
 // just because grounding hasn't run.
 export function MapView({ trip }: { trip: Trip }) {

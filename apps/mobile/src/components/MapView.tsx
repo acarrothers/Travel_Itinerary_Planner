@@ -44,11 +44,11 @@ export function MapView({ trip }: { trip: Trip }) {
     );
   }
 
-  // Fallback: no coordinates yet (Foursquare grounding off) or no native module.
+  // Fallback: no coordinates yet (Places grounding off) or no native module.
   if (points.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Map appears once itinerary items have coordinates (Foursquare grounding).</Text>
+        <Text style={styles.emptyText}>Map appears once itinerary items have coordinates (Google Places grounding).</Text>
       </View>
     );
   }

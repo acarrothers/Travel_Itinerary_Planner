@@ -86,8 +86,8 @@ export interface Offer {
   status: "draft" | "pending" | "live" | "paused" | "expired";
 }
 
-// A point of interest used to ground generation (PRD §6.9). Sourced from Foursquare
-// (decided) with curated/open data as alternatives. `tags` feed item categoryTags.
+// A point of interest used to ground generation (PRD §6.9). Sourced from the Google
+// Places API, with curated/open data as alternatives. `tags` feed item categoryTags.
 export interface Poi {
   id: string;
   name: string;

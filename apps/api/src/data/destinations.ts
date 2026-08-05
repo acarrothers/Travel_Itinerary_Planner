@@ -1,5 +1,5 @@
 // Curated popular destinations — used for instant suggestions and as the fallback
-// when no live autocomplete provider (Foursquare) is configured.
+// when no live autocomplete provider (Google Places) is configured.
 export const POPULAR_DESTINATIONS: string[] = [
   "Paris, France", "London, United Kingdom", "Rome, Italy", "Barcelona, Spain", "Madrid, Spain",
   "Lisbon, Portugal", "Porto, Portugal", "Amsterdam, Netherlands", "Berlin, Germany", "Munich, Germany",

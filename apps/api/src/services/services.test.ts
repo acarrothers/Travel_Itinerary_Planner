@@ -42,7 +42,7 @@ describe("buildTrip", () => {
 });
 
 describe("getPois", () => {
-  it("returns [] gracefully when no FOURSQUARE_API_KEY is set", async () => {
+  it("returns [] gracefully when no Google Places key is set", async () => {
     expect(await getPois(prefs)).toEqual([]);
   });
 });

@@ -13,7 +13,7 @@ Shared **web + native mobile + API** codebase.
 - **API:** Fastify + TypeScript (`apps/api`)
 - **AI:** provider-agnostic **model orchestration layer** (`packages/ai-orchestration`) — Anthropic, OpenAI, Gemini, Grok
 - **Partner APIs:** provider-agnostic **partner-integration layer** (`apps/api/src/partners`) — Viator, GetYourGuide, G Adventures, Expedia; catalog fallback
-- **POI grounding:** Foursquare Places · **Maps:** Google Maps Platform
+- **POI grounding:** Google Places API · **Maps:** Google Maps Platform
 - **DB:** PostgreSQL (`pg`) with an in-memory fallback
 - **Design system:** "Vibrant Voyager" (purple + Chatr-yellow) tokens in `packages/ui`
 - **Monorepo:** pnpm workspaces + Turborepo · **Tests:** Vitest · **CI:** GitHub Actions
@@ -66,7 +66,7 @@ generator, so the app is fully usable locally without external services.
 
 ## Environment (see RAILWAY_ENV_CHECKLIST.md for the full list)
 - **AI:** `GEMINI_API_KEY`, `XAI_API_KEY` (also `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) — richer itineraries
-- **Grounding/maps:** `FOURSQUARE_API_KEY` (real places + map pins), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (web, build-time)
+- **Grounding/maps:** `GOOGLE_PLACES_API_KEY` (server-side Places — real places + map-pin coordinates; falls back to `GOOGLE_MAPS_API_KEY`), `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (web map, build-time)
 - **DB:** `DATABASE_URL` (Postgres; omit for in-memory)
 - **Auth:** `JWT_SECRET`, `GOOGLE_CLIENT_ID`/`NEXT_PUBLIC_GOOGLE_CLIENT_ID`, Apple client IDs, `RESEND_API_KEY`/`APP_WEB_URL` (emails)
 - **CMS/RBAC:** `APP_API_KEYS` (JSON key→role; **required in production** or the CMS is locked) + `NODE_ENV=production`

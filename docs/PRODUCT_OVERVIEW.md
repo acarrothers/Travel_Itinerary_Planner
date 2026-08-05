@@ -47,7 +47,7 @@ catalog and, where configured, **live partner APIs**.
   timeout + error isolation; CMS catalog fallback. See `docs/PARTNER_API_INTEGRATION.md`.
 - **Data** — PostgreSQL via a `Db` seam with in-memory fallback; offers/partners/trips/
   users/offer-events/account-limits.
-- **Grounding/maps** — Foursquare Places (real POIs + coordinates), Google Maps (render;
+- **Grounding/maps** — Google Places API (real POIs + coordinates), Google Maps (render;
   geocodes the destination so the map shows even before per-stop coordinates exist).
 - **Design system** — "Vibrant Voyager": vibrant purple + Chatr-yellow (CTAs/partner
   accents), Hanken Grotesk / Inter / JetBrains Mono; tokens shared web + mobile.
