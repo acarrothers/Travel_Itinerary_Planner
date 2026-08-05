@@ -24,8 +24,8 @@ function Chips<T extends string>({ options, value, onChange }: { options: T[]; v
   );
 }
 
-export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPreferences) => void; loading: boolean }) {
-  const [destination, setDestination] = useState("Lisbon");
+export function OnboardingForm({ onGenerate, loading, submitLabel = "Generate itinerary", loadingLabel = "Working…" }: { onGenerate: (p: TripPreferences) => void; loading: boolean; submitLabel?: string; loadingLabel?: string }) {
+  const [destination, setDestination] = useState("Lisbon, Portugal");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const skipFetch = useRef(false); // don't re-query right after picking a suggestion
 
@@ -81,7 +81,7 @@ export function OnboardingForm({ onGenerate, loading }: { onGenerate: (p: TripPr
       <Text style={styles.lbl}>Interests</Text>
       <Chips options={INTERESTS} value={interests} onChange={setInterests} />
       <Pressable style={[styles.btn, loading && { opacity: 0.6 }]} disabled={loading} onPress={submit}>
-        <Text style={styles.btnText}>{loading ? "Generating…" : "Generate itinerary"}</Text>
+        <Text style={styles.btnText}>{loading ? loadingLabel : submitLabel}</Text>
       </Pressable>
     </View>
   );
@@ -98,6 +98,6 @@ const styles = StyleSheet.create({
   chipOn: { borderColor: tokens.color.blue, backgroundColor: tokens.color.light },
   chipText: { color: tokens.color.mid, fontSize: 14 },
   chipTextOn: { color: tokens.color.navy },
-  btn: { backgroundColor: tokens.color.accent, borderRadius: tokens.radius.md, padding: 14, alignItems: "center" },
-  btnText: { color: tokens.color.ink, fontWeight: "700", fontSize: 15 },
+  btn: { backgroundColor: tokens.color.accent, borderRadius: tokens.radius.lg, padding: 14, alignItems: "center" },
+  btnText: { color: tokens.color.primaryDark, fontWeight: "700", fontSize: 15 },
 });
